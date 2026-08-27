@@ -1,13 +1,14 @@
-import { ArrowLeft, Check, Dumbbell } from 'lucide-react';
+import { ArrowLeft, Check, Dumbbell, Pencil } from 'lucide-react';
 import type { Workout } from '../types/workout';
 
 interface WorkoutDetailProps {
   workout: Workout;
   onBack: () => void;
   onSelectExercise: (exerciseId: string) => void;
+  onEditWorkout: () => void;
 }
 
-export function WorkoutDetail({ workout, onBack, onSelectExercise }: WorkoutDetailProps) {
+export function WorkoutDetail({ workout, onBack, onSelectExercise, onEditWorkout }: WorkoutDetailProps) {
   const completedCount = workout.exercises.filter((e) => e.series.every((s) => s.completed)).length;
   const totalExercises = workout.exercises.length;
   const progress = totalExercises > 0 ? Math.round((completedCount / totalExercises) * 100) : 0;
@@ -18,7 +19,14 @@ export function WorkoutDetail({ workout, onBack, onSelectExercise }: WorkoutDeta
         <button onClick={onBack} className="p-2 -ml-1 min-w-[44px] min-h-[44px] flex items-center justify-center">
           <ArrowLeft size={24} />
         </button>
-        <h1 className="text-xl font-bold truncate">{workout.name}</h1>
+        <h1 className="text-xl font-bold truncate flex-1">{workout.name}</h1>
+        <button
+          onClick={onEditWorkout}
+          className="p-2 min-w-[44px] min-h-[44px] flex items-center justify-center"
+          title="Editar treino"
+        >
+          <Pencil size={20} />
+        </button>
       </header>
 
       <main className="flex-1 p-3 sm:p-4 pb-20">

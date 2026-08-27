@@ -1,4 +1,4 @@
-import { ChevronRight, Dumbbell } from 'lucide-react';
+import { ChevronRight, Dumbbell, Pencil, Trash2 } from 'lucide-react';
 import type { Workout } from '../types/workout';
 
 interface WorkoutListProps {
@@ -7,15 +7,29 @@ interface WorkoutListProps {
   totalWeeks: number;
   onSelectWorkout: (id: string) => void;
   onAddWorkout: () => void;
+  onEditWorkout: (id: string) => void;
+  onDeleteWorkout: (id: string) => void;
 }
 
-export function WorkoutList({ workouts, currentWeek, totalWeeks, onSelectWorkout, onAddWorkout }: WorkoutListProps) {
+export function WorkoutList({ workouts, currentWeek, totalWeeks, onSelectWorkout, onAddWorkout, onEditWorkout, onDeleteWorkout }: WorkoutListProps) {
   const totalExercises = workouts.reduce((acc, w) => acc + w.exercises.length, 0);
   const completedExercises = workouts.reduce(
     (acc, w) => acc + w.exercises.filter((e) => e.series.every((s) => s.completed)).length,
     0
   );
   const progress = totalExercises > 0 ? Math.round((completedExercises / totalExercises) * 100) : 0;
+
+  const handleDelete = (e: React.MouseEvent, id: string, name: string) => {
+    e.stopPropagation();
+    if (window.confirm(`Deseja excluir o treino "${name}"?`)) {
+      onDeleteWorkout(id);
+    }
+  };
+
+  const handleEdit = (e: React.MouseEvent, id: string) => {
+    e.stopPropagation();
+    onEditWorkout(id);
+  };
 
   return (
     <div className="flex flex-col min-h-dvh bg-gray-100 safe-area-inset">
@@ -34,21 +48,42 @@ export function WorkoutList({ workouts, currentWeek, totalWeeks, onSelectWorkout
 
         <div className="bg-white rounded-lg shadow overflow-hidden">
           {workouts.map((workout, index) => (
-            <button
+            <div
               key={workout.id}
-              onClick={() => onSelectWorkout(workout.id)}
-              className={`w-full flex items-center justify-between px-4 py-3 sm:py-4 border-b border-gray-100 active:bg-gray-50 transition-colors min-h-[56px] ${
+              className={`flex items-center border-b border-gray-100 min-h-[56px] ${
                 workout.lastAccessed && index === 0 ? 'font-bold' : ''
               }`}
             >
-              <div className="flex items-center gap-3">
-                <div className="w-8 h-8 bg-red-500 text-white rounded flex items-center justify-center font-bold text-sm shrink-0">
-                  {String.fromCharCode(65 + index)}
+              <button
+                onClick={() => onSelectWorkout(workout.id)}
+                className="flex-1 flex items-center justify-between px-4 py-3 sm:py-4 active:bg-gray-50 transition-colors"
+              >
+                <div className="flex items-center gap-3">
+                  <div className="w-8 h-8 bg-red-500 text-white rounded flex items-center justify-center font-bold text-sm shrink-0">
+                    {String.fromCharCode(65 + index)}
+                  </div>
+                  <span className="text-gray-800 text-sm sm:text-base">{workout.name}</span>
                 </div>
-                <span className="text-gray-800 text-sm sm:text-base">{workout.name}</span>
+                <ChevronRight size={20} className="text-gray-400 shrink-0" />
+              </button>
+              
+              <div className="flex items-center pr-2 gap-1">
+                <button
+                  onClick={(e) => handleEdit(e, workout.id)}
+                  className="p-2 text-gray-400 hover:text-blue-500 active:text-blue-600 min-w-[40px] min-h-[40px] flex items-center justify-center"
+                  title="Editar"
+                >
+                  <Pencil size={18} />
+                </button>
+                <button
+                  onClick={(e) => handleDelete(e, workout.id, workout.name)}
+                  className="p-2 text-gray-400 hover:text-red-500 active:text-red-600 min-w-[40px] min-h-[40px] flex items-center justify-center"
+                  title="Excluir"
+                >
+                  <Trash2 size={18} />
+                </button>
               </div>
-              <ChevronRight size={20} className="text-gray-400 shrink-0" />
-            </button>
+            </div>
           ))}
 
           <button

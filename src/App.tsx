@@ -183,6 +183,17 @@ function App() {
     }
   }, [selectedWorkout, selectedExerciseIndex]);
 
+  const handlePreviousExercise = useCallback(() => {
+    if (!selectedWorkout || selectedExerciseIndex <= 0) return;
+    const prevIndex = selectedExerciseIndex - 1;
+    setSelectedExerciseId(selectedWorkout.exercises[prevIndex].id);
+  }, [selectedWorkout, selectedExerciseIndex]);
+
+  const handleFinishExercise = useCallback(() => {
+    setView('detail');
+    setSelectedExerciseId(null);
+  }, []);
+
   const handleSaveWorkout = useCallback(
     (workout: Workout) => {
       setWorkouts((prev) => {
@@ -196,6 +207,28 @@ function App() {
       setEditingWorkout(null);
     },
     [setWorkouts]
+  );
+
+  const handleEditWorkout = useCallback(
+    (id: string) => {
+      const workout = workouts.find((w) => w.id === id);
+      if (workout) {
+        setEditingWorkout(workout);
+        setView('crud');
+      }
+    },
+    [workouts]
+  );
+
+  const handleDeleteWorkout = useCallback(
+    (id: string) => {
+      setWorkouts((prev) => prev.filter((w) => w.id !== id));
+      if (selectedWorkoutId === id) {
+        setSelectedWorkoutId(null);
+        setView('list');
+      }
+    },
+    [setWorkouts, selectedWorkoutId]
   );
 
   const handleBack = useCallback(() => {
@@ -230,12 +263,21 @@ function App() {
         exercise={selectedExercise}
         exerciseIndex={selectedExerciseIndex}
         totalExercises={selectedWorkout.exercises.length}
-        onBack={handleBack}
+        onBack={
+          selectedExerciseIndex > 0
+            ? handlePreviousExercise
+            : () => {
+                setView('detail');
+                setSelectedExerciseId(null);
+              }
+        }
+        onPrevious={selectedExerciseIndex > 0 ? handlePreviousExercise : undefined}
         onNext={
           selectedExerciseIndex < selectedWorkout.exercises.length - 1
             ? handleNextExercise
             : undefined
         }
+        onFinish={handleFinishExercise}
         onUpdateSeries={handleUpdateSeries}
       />
     );
@@ -247,6 +289,7 @@ function App() {
         workout={selectedWorkout}
         onBack={handleBack}
         onSelectExercise={handleSelectExercise}
+        onEditWorkout={() => handleEditWorkout(selectedWorkout.id)}
       />
     );
   }
@@ -261,6 +304,8 @@ function App() {
         setEditingWorkout(null);
         setView('crud');
       }}
+      onEditWorkout={handleEditWorkout}
+      onDeleteWorkout={handleDeleteWorkout}
     />
   );
 }
