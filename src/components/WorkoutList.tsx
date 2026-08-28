@@ -10,6 +10,13 @@ interface WorkoutListProps {
 }
 
 export function WorkoutList({ workouts, onSelectWorkout, onAddWorkout, onEditWorkout, onDeleteWorkout }: WorkoutListProps) {
+  const lastAccessedId = workouts.reduce<string | null>((latest, w) => {
+    if (!w.lastAccessed) return latest;
+    if (!latest) return w.id;
+    const prev = workouts.find((x) => x.id === latest);
+    return w.lastAccessed > (prev?.lastAccessed ?? 0) ? w.id : latest;
+  }, null);
+
   const handleDelete = (e: React.MouseEvent, id: string, name: string) => {
     e.stopPropagation();
     if (window.confirm(`Deseja excluir o treino "${name}"?`)) {
@@ -42,7 +49,7 @@ export function WorkoutList({ workouts, onSelectWorkout, onAddWorkout, onEditWor
             <div
               key={workout.id}
               className={`flex items-center border-b border-gray-100 min-h-[56px] ${
-                workout.lastAccessed && index === 0 ? 'font-bold' : ''
+                workout.id === lastAccessedId ? 'font-bold' : ''
               }`}
             >
               <button
