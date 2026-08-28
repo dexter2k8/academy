@@ -5,6 +5,8 @@ interface ExerciseDetailProps {
   exercise: Exercise;
   exerciseIndex: number;
   totalExercises: number;
+  completedSeriesInWorkout: number;
+  totalSeriesInWorkout: number;
   onBack: () => void;
   onPrevious?: () => void;
   onNext?: () => void;
@@ -12,10 +14,19 @@ interface ExerciseDetailProps {
   onUpdateSeries: (seriesId: string, field: 'reps' | 'weight' | 'completed', value: number | boolean) => void;
 }
 
-export function ExerciseDetail({ exercise, exerciseIndex, totalExercises, onBack, onPrevious, onNext, onFinish, onUpdateSeries }: ExerciseDetailProps) {
-  const completedSeries = exercise.series.filter((s) => s.completed).length;
-  const totalSeries = exercise.series.length;
-  const progress = totalSeries > 0 ? Math.round((completedSeries / totalSeries) * 100) : 0;
+export function ExerciseDetail({
+  exercise,
+  exerciseIndex,
+  totalExercises,
+  completedSeriesInWorkout,
+  totalSeriesInWorkout,
+  onBack,
+  onPrevious,
+  onNext,
+  onFinish,
+  onUpdateSeries,
+}: ExerciseDetailProps) {
+  const progress = totalSeriesInWorkout > 0 ? Math.round((completedSeriesInWorkout / totalSeriesInWorkout) * 100) : 0;
 
   return (
     <div className="flex flex-col min-h-dvh bg-gray-100 safe-area-inset">
@@ -113,7 +124,7 @@ export function ExerciseDetail({ exercise, exerciseIndex, totalExercises, onBack
       <footer className="bg-white border-t border-gray-200 px-4 py-3 flex justify-between items-center sticky bottom-0 z-10 safe-area-bottom">
         <div className="flex items-center gap-2 text-gray-600">
           <Dumbbell size={18} />
-          <span className="text-xs sm:text-sm">Feito {completedSeries} de {totalSeries}</span>
+          <span className="text-xs sm:text-sm">Feito {completedSeriesInWorkout} de {totalSeriesInWorkout}</span>
         </div>
         <div className="flex items-center gap-2 text-gray-600">
           <span className="text-xs sm:text-base font-medium">{progress}% Completo</span>

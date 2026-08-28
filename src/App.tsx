@@ -176,12 +176,32 @@ function App() {
   );
 
   const handleNextExercise = useCallback(() => {
-    if (!selectedWorkout || selectedExerciseIndex < 0) return;
+    if (!selectedWorkout || selectedExerciseIndex < 0 || !selectedWorkoutId) return;
+    
+    const currentExercise = selectedWorkout.exercises[selectedExerciseIndex];
+    if (!currentExercise) return;
+
+    setWorkouts((prev) =>
+      prev.map((w) => {
+        if (w.id !== selectedWorkoutId) return w;
+        return {
+          ...w,
+          exercises: w.exercises.map((e) => {
+            if (e.id !== currentExercise.id) return e;
+            return {
+              ...e,
+              series: e.series.map((s) => ({ ...s, completed: true })),
+            };
+          }),
+        };
+      })
+    );
+
     const nextIndex = selectedExerciseIndex + 1;
     if (nextIndex < selectedWorkout.exercises.length) {
       setSelectedExerciseId(selectedWorkout.exercises[nextIndex].id);
     }
-  }, [selectedWorkout, selectedExerciseIndex]);
+  }, [selectedWorkout, selectedExerciseIndex, selectedWorkoutId, setWorkouts]);
 
   const handlePreviousExercise = useCallback(() => {
     if (!selectedWorkout || selectedExerciseIndex <= 0) return;
@@ -190,9 +210,25 @@ function App() {
   }, [selectedWorkout, selectedExerciseIndex]);
 
   const handleFinishExercise = useCallback(() => {
-    setView('detail');
+    if (!selectedWorkoutId) return;
+
+    setWorkouts((prev) =>
+      prev.map((w) => {
+        if (w.id !== selectedWorkoutId) return w;
+        return {
+          ...w,
+          exercises: w.exercises.map((e) => ({
+            ...e,
+            series: e.series.map((s) => ({ ...s, completed: false })),
+          })),
+        };
+      })
+    );
+
+    setView('list');
+    setSelectedWorkoutId(null);
     setSelectedExerciseId(null);
-  }, []);
+  }, [selectedWorkoutId, setWorkouts]);
 
   const handleSaveWorkout = useCallback(
     (workout: Workout) => {
@@ -258,11 +294,19 @@ function App() {
   }
 
   if (view === 'exercise' && selectedExercise && selectedWorkout) {
+    const totalSeriesInWorkout = selectedWorkout.exercises.reduce((acc, e) => acc + e.series.length, 0);
+    const completedSeriesInWorkout = selectedWorkout.exercises.reduce(
+      (acc, e) => acc + e.series.filter((s) => s.completed).length,
+      0
+    );
+
     return (
       <ExerciseDetail
         exercise={selectedExercise}
         exerciseIndex={selectedExerciseIndex}
         totalExercises={selectedWorkout.exercises.length}
+        completedSeriesInWorkout={completedSeriesInWorkout}
+        totalSeriesInWorkout={totalSeriesInWorkout}
         onBack={
           selectedExerciseIndex > 0
             ? handlePreviousExercise
