@@ -307,14 +307,10 @@ function App() {
         totalExercises={selectedWorkout.exercises.length}
         completedSeriesInWorkout={completedSeriesInWorkout}
         totalSeriesInWorkout={totalSeriesInWorkout}
-        onBack={
-          selectedExerciseIndex > 0
-            ? handlePreviousExercise
-            : () => {
-                setView('detail');
-                setSelectedExerciseId(null);
-              }
-        }
+        onBack={() => {
+          setView('detail');
+          setSelectedExerciseId(null);
+        }}
         onPrevious={selectedExerciseIndex > 0 ? handlePreviousExercise : undefined}
         onNext={
           selectedExerciseIndex < selectedWorkout.exercises.length - 1
