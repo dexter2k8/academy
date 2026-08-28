@@ -1,24 +1,15 @@
-import { ChevronRight, Dumbbell, Pencil, Trash2 } from 'lucide-react';
+import { ChevronRight, Pencil, Trash2 } from 'lucide-react';
 import type { Workout } from '../types/workout';
 
 interface WorkoutListProps {
   workouts: Workout[];
-  currentWeek: number;
-  totalWeeks: number;
   onSelectWorkout: (id: string) => void;
   onAddWorkout: () => void;
   onEditWorkout: (id: string) => void;
   onDeleteWorkout: (id: string) => void;
 }
 
-export function WorkoutList({ workouts, currentWeek, totalWeeks, onSelectWorkout, onAddWorkout, onEditWorkout, onDeleteWorkout }: WorkoutListProps) {
-  const totalExercises = workouts.reduce((acc, w) => acc + w.exercises.length, 0);
-  const completedExercises = workouts.reduce(
-    (acc, w) => acc + w.exercises.filter((e) => e.series.every((s) => s.completed)).length,
-    0
-  );
-  const progress = totalExercises > 0 ? Math.round((completedExercises / totalExercises) * 100) : 0;
-
+export function WorkoutList({ workouts, onSelectWorkout, onAddWorkout, onEditWorkout, onDeleteWorkout }: WorkoutListProps) {
   const handleDelete = (e: React.MouseEvent, id: string, name: string) => {
     e.stopPropagation();
     if (window.confirm(`Deseja excluir o treino "${name}"?`)) {
@@ -96,14 +87,8 @@ export function WorkoutList({ workouts, currentWeek, totalWeeks, onSelectWorkout
         </div>
       </main>
 
-      <footer className="bg-white border-t border-gray-200 px-4 py-3 flex justify-between items-center sticky bottom-0 z-10 safe-area-bottom">
-        <div className="flex items-center gap-2 text-gray-600">
-          <Dumbbell size={18} />
-          <span className="text-xs sm:text-sm">Semana {currentWeek} de {totalWeeks}</span>
-        </div>
-        <div className="flex items-center gap-2 text-gray-600">
-          <span className="text-xs sm:text-sm font-medium">{progress}% Completo</span>
-        </div>
+      <footer className="bg-white border-t border-gray-200 px-4 py-3 flex justify-center items-center sticky bottom-0 z-10 safe-area-bottom">
+        <p className="text-xs text-gray-400">&copy; 2026 Gerenciador de Treino</p>
       </footer>
     </div>
   );

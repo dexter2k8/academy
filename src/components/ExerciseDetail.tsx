@@ -8,7 +8,6 @@ interface ExerciseDetailProps {
   completedSeriesInWorkout: number;
   totalSeriesInWorkout: number;
   onBack: () => void;
-  onPrevious?: () => void;
   onNext?: () => void;
   onFinish: () => void;
   onUpdateSeries: (seriesId: string, field: 'reps' | 'weight' | 'completed', value: number | boolean) => void;
@@ -21,7 +20,6 @@ export function ExerciseDetail({
   completedSeriesInWorkout,
   totalSeriesInWorkout,
   onBack,
-  onPrevious,
   onNext,
   onFinish,
   onUpdateSeries,
@@ -87,8 +85,8 @@ export function ExerciseDetail({
             ))}
           </div>
 
-          <div className="mt-4 sm:mt-6 space-y-3">
-            {onNext && (
+          <div className="mt-4 sm:mt-6">
+            {onNext ? (
               <button
                 onClick={onNext}
                 className="w-full flex items-center justify-center gap-2 bg-red-500 text-white py-3 rounded-lg active:bg-red-600 transition-colors min-h-[48px] text-sm sm:text-base"
@@ -96,25 +94,13 @@ export function ExerciseDetail({
                 <span>Próximo</span>
                 <ArrowRight size={20} />
               </button>
-            )}
-
-            {!onNext && (
+            ) : (
               <button
                 onClick={onFinish}
                 className="w-full flex items-center justify-center gap-2 bg-green-500 text-white py-3 rounded-lg active:bg-green-600 transition-colors min-h-[48px] text-sm sm:text-base"
               >
                 <span>Finalizar</span>
                 <ArrowUp size={20} />
-              </button>
-            )}
-
-            {onPrevious && (
-              <button
-                onClick={onPrevious}
-                className="w-full flex items-center justify-center gap-2 bg-gray-200 text-gray-700 py-3 rounded-lg active:bg-gray-300 transition-colors min-h-[48px] text-sm sm:text-base"
-              >
-                <ArrowLeft size={20} />
-                <span>Anterior</span>
               </button>
             )}
           </div>

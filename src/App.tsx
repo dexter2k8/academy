@@ -128,8 +128,6 @@ const initialWorkouts: Workout[] = [
 
 function App() {
   const [workouts, setWorkouts] = useLocalStorage<Workout[]>('workouts', initialWorkouts);
-  const [currentWeek] = useState(2);
-  const [totalWeeks] = useState(2);
 
   const [view, setView] = useState<ViewType>('list');
   const [selectedWorkoutId, setSelectedWorkoutId] = useState<string | null>(null);
@@ -202,12 +200,6 @@ function App() {
       setSelectedExerciseId(selectedWorkout.exercises[nextIndex].id);
     }
   }, [selectedWorkout, selectedExerciseIndex, selectedWorkoutId, setWorkouts]);
-
-  const handlePreviousExercise = useCallback(() => {
-    if (!selectedWorkout || selectedExerciseIndex <= 0) return;
-    const prevIndex = selectedExerciseIndex - 1;
-    setSelectedExerciseId(selectedWorkout.exercises[prevIndex].id);
-  }, [selectedWorkout, selectedExerciseIndex]);
 
   const handleFinishExercise = useCallback(() => {
     if (!selectedWorkoutId) return;
@@ -311,7 +303,6 @@ function App() {
           setView('detail');
           setSelectedExerciseId(null);
         }}
-        onPrevious={selectedExerciseIndex > 0 ? handlePreviousExercise : undefined}
         onNext={
           selectedExerciseIndex < selectedWorkout.exercises.length - 1
             ? handleNextExercise
@@ -337,8 +328,6 @@ function App() {
   return (
     <WorkoutList
       workouts={workouts}
-      currentWeek={currentWeek}
-      totalWeeks={totalWeeks}
       onSelectWorkout={handleSelectWorkout}
       onAddWorkout={() => {
         setEditingWorkout(null);
