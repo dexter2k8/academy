@@ -1,6 +1,7 @@
 import { useState, useRef } from "react";
 import { ArrowLeft, Plus, Trash2, Upload, X, Timer, Dumbbell, Zap } from "lucide-react";
 import type { Workout, Exercise } from "../types/workout";
+import { generateId, createDefaultExercise } from "../types/workout";
 import { saveImage, deleteImage, isIdbImageKey } from "../hooks/useWorkoutDB";
 
 interface WorkoutFormProps {
@@ -9,30 +10,10 @@ interface WorkoutFormProps {
   onCancel: () => void;
 }
 
-function generateId() {
-  return Math.random().toString(36).substring(2, 9);
-}
-
 export function WorkoutForm({ workout, onSave, onCancel }: WorkoutFormProps) {
   const [name, setName] = useState(workout?.name || "");
   const [exercises, setExercises] = useState<Exercise[]>(
-    workout?.exercises || [
-      {
-        id: generateId(),
-        name: "",
-        image: "",
-        type: "repetition",
-        recommendedSets: 3,
-        recommendedRepsMin: 15,
-        recommendedRepsMax: 20,
-        recommendedWeight: 5,
-        series: [
-          { id: generateId(), reps: 15, weight: 5, completed: false },
-          { id: generateId(), reps: 15, weight: 5, completed: false },
-          { id: generateId(), reps: 15, weight: 5, completed: false },
-        ],
-      },
-    ],
+    workout?.exercises || [createDefaultExercise()],
   );
   const fileInputRefs = useRef<Record<string, HTMLInputElement | null>>({});
 
@@ -54,24 +35,7 @@ export function WorkoutForm({ workout, onSave, onCancel }: WorkoutFormProps) {
   };
 
   const addExercise = () => {
-    setExercises([
-      ...exercises,
-      {
-        id: generateId(),
-        name: "",
-        image: "",
-        type: "repetition",
-        recommendedSets: 3,
-        recommendedRepsMin: 15,
-        recommendedRepsMax: 20,
-        recommendedWeight: 5,
-        series: [
-          { id: generateId(), reps: 15, weight: 5, completed: false },
-          { id: generateId(), reps: 15, weight: 5, completed: false },
-          { id: generateId(), reps: 15, weight: 5, completed: false },
-        ],
-      },
-    ]);
+    setExercises([...exercises, createDefaultExercise()]);
   };
 
   const removeExercise = (exerciseId: string) => {

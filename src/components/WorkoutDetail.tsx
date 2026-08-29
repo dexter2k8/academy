@@ -1,5 +1,6 @@
 import { ArrowLeft, Check, Dumbbell, Pencil, Timer, Zap } from "lucide-react";
 import type { Workout } from "../types/workout";
+import { getCompletedCount, isExerciseCompleted, getExerciseSeries } from "../types/workout";
 
 interface WorkoutDetailProps {
   workout: Workout;
@@ -14,15 +15,7 @@ export function WorkoutDetail({
   onSelectExercise,
   onEditWorkout,
 }: WorkoutDetailProps) {
-  const completedCount = workout.exercises.filter((e) => {
-    if (e.type === "timed") {
-      return e.timedSeries?.every((s) => s.completed) ?? false;
-    }
-    if (e.type === "hiit") {
-      return e.hiitSeries?.every((s) => s.completed) ?? false;
-    }
-    return e.series.every((s) => s.completed);
-  }).length;
+  const completedCount = workout.exercises.filter(isExerciseCompleted).length;
   const totalExercises = workout.exercises.length;
   const progress = totalExercises > 0 ? Math.round((completedCount / totalExercises) * 100) : 0;
 
@@ -50,21 +43,9 @@ export function WorkoutDetail({
           {workout.exercises.map((exercise) => {
             const isTimed = exercise.type === "timed";
             const isHiit = exercise.type === "hiit";
-            const isCompleted = isTimed
-              ? (exercise.timedSeries?.every((s) => s.completed) ?? false)
-              : isHiit
-                ? (exercise.hiitSeries?.every((s) => s.completed) ?? false)
-                : exercise.series.every((s) => s.completed);
-            const completedSeries = isTimed
-              ? exercise.timedSeries?.filter((s) => s.completed).length || 0
-              : isHiit
-                ? exercise.hiitSeries?.filter((s) => s.completed).length || 0
-                : exercise.series.filter((s) => s.completed).length;
-            const totalSeries = isTimed
-              ? exercise.timedSeries?.length || 0
-              : isHiit
-                ? exercise.hiitSeries?.length || 0
-                : exercise.series.length;
+            const isCompleted = isExerciseCompleted(exercise);
+            const completedSeries = getCompletedCount(exercise);
+            const totalSeries = getExerciseSeries(exercise).length;
 
             return (
               <button
@@ -87,7 +68,7 @@ export function WorkoutDetail({
                     {isTimed ? (
                       <>
                         <Timer size={12} className="inline mr-1" />
-                        {exercise.series.length} x {exercise.duration || 30}s
+                        {exercise.recommendedSets} x {exercise.duration || 30}s
                       </>
                     ) : isHiit ? (
                       <>

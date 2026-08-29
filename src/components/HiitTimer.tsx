@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { Play, Pause, RotateCcw } from "lucide-react";
+import { formatTime } from "../utils/format";
 
 type HiitPhase = "prep" | "work" | "rest";
 
@@ -120,12 +121,6 @@ export function HiitTimer({
   const circumference = 2 * Math.PI * 90;
   const strokeDashoffset = circumference - (progress / 100) * circumference;
   const phaseColor = getPhaseColor(phase);
-
-  const formatTime = (seconds: number) => {
-    const mins = Math.floor(seconds / 60);
-    const secs = seconds % 60;
-    return `${mins.toString().padStart(2, "0")}:${secs.toString().padStart(2, "0")}`;
-  };
 
   return (
     <div className="flex flex-col items-center gap-4">

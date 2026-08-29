@@ -9,6 +9,7 @@ import {
   Zap,
 } from "lucide-react";
 import type { Exercise } from "../types/workout";
+import { getCompletedCount, getExerciseSeries } from "../types/workout";
 import { getImage, isIdbImageKey } from "../hooks/useWorkoutDB";
 import { Timer } from "./Timer";
 import { HiitTimer } from "./HiitTimer";
@@ -46,12 +47,21 @@ export function ExerciseDetail({
     totalSeriesInWorkout > 0
       ? Math.round((completedSeriesInWorkout / totalSeriesInWorkout) * 100)
       : 0;
+  const isTimedExercise = exercise.type === "timed";
+  const isHiitExercise = exercise.type === "hiit";
   const [imageUrl, setImageUrl] = useState<string | null>(null);
   const [currentTimedSeriesIndex, setCurrentTimedSeriesIndex] = useState(() => {
     if (exercise.type !== "timed" || !exercise.timedSeries) return 0;
     const firstUnchecked = exercise.timedSeries.findIndex((s) => !s.completed);
     return firstUnchecked === -1 ? exercise.timedSeries.length - 1 : firstUnchecked;
   });
+
+  useEffect(() => {
+    if (isTimedExercise && exercise.timedSeries) {
+      const firstUnchecked = exercise.timedSeries.findIndex((s) => !s.completed);
+      setCurrentTimedSeriesIndex(firstUnchecked === -1 ? exercise.timedSeries.length - 1 : firstUnchecked);
+    }
+  }, [isTimedExercise, exercise.timedSeries]);
 
   const [currentHiitSeriesIndex, setCurrentHiitSeriesIndex] = useState(() => {
     if (exercise.type !== "hiit" || !exercise.hiitSeries) return 0;
@@ -115,18 +125,8 @@ export function ExerciseDetail({
     setCurrentHiitSeriesIndex(0);
   }, [exercise.hiitSeries, onUpdateTimedSeries]);
 
-  const isTimedExercise = exercise.type === "timed";
-  const isHiitExercise = exercise.type === "hiit";
-  const completedSeries = isTimedExercise
-    ? exercise.timedSeries?.filter((s) => s.completed).length || 0
-    : isHiitExercise
-      ? exercise.hiitSeries?.filter((s) => s.completed).length || 0
-      : exercise.series.filter((s) => s.completed).length;
-  const totalSeries = isTimedExercise
-    ? exercise.timedSeries?.length || 0
-    : isHiitExercise
-      ? exercise.hiitSeries?.length || 0
-      : exercise.series.length;
+  const completedSeries = getCompletedCount(exercise);
+  const totalSeries = getExerciseSeries(exercise).length;
 
   return (
     <div className="flex flex-col min-h-dvh bg-gray-100 safe-area-inset">

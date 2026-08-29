@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { Play, Pause, RotateCcw } from "lucide-react";
+import { formatTime } from "../utils/format";
 
 interface TimerProps {
   duration: number;
@@ -52,12 +53,6 @@ export function Timer({ duration, onComplete }: TimerProps) {
   const progress = duration > 0 ? ((duration - timeLeft) / duration) * 100 : 0;
   const circumference = 2 * Math.PI * 90;
   const strokeDashoffset = circumference - (progress / 100) * circumference;
-
-  const formatTime = (seconds: number) => {
-    const mins = Math.floor(seconds / 60);
-    const secs = seconds % 60;
-    return `${mins.toString().padStart(2, "0")}:${secs.toString().padStart(2, "0")}`;
-  };
 
   return (
     <div className="flex flex-col items-center gap-4">

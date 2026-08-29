@@ -41,3 +41,40 @@ export interface Workout {
 }
 
 export type ViewType = 'list' | 'detail' | 'exercise' | 'crud';
+
+export function getExerciseSeries(exercise: Exercise): readonly { id: string; completed: boolean }[] {
+  if (exercise.type === 'timed') return exercise.timedSeries ?? [];
+  if (exercise.type === 'hiit') return exercise.hiitSeries ?? [];
+  return exercise.series;
+}
+
+export function getCompletedCount(exercise: Exercise): number {
+  return getExerciseSeries(exercise).filter((s) => s.completed).length;
+}
+
+export function isExerciseCompleted(exercise: Exercise): boolean {
+  const series = getExerciseSeries(exercise);
+  return series.length > 0 && series.every((s) => s.completed);
+}
+
+export function generateId(): string {
+  return Math.random().toString(36).substring(2, 9);
+}
+
+export function createDefaultExercise(): Exercise {
+  return {
+    id: generateId(),
+    name: '',
+    image: '',
+    type: 'repetition',
+    recommendedSets: 3,
+    recommendedRepsMin: 15,
+    recommendedRepsMax: 20,
+    recommendedWeight: 5,
+    series: [
+      { id: generateId(), reps: 15, weight: 5, completed: false },
+      { id: generateId(), reps: 15, weight: 5, completed: false },
+      { id: generateId(), reps: 15, weight: 5, completed: false },
+    ],
+  };
+}

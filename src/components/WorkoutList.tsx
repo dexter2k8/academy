@@ -10,12 +10,9 @@ interface WorkoutListProps {
 }
 
 export function WorkoutList({ workouts, onSelectWorkout, onAddWorkout, onEditWorkout, onDeleteWorkout }: WorkoutListProps) {
-  const lastAccessedId = workouts.reduce<string | null>((latest, w) => {
-    if (!w.lastAccessed) return latest;
-    if (!latest) return w.id;
-    const prev = workouts.find((x) => x.id === latest);
-    return w.lastAccessed > (prev?.lastAccessed ?? 0) ? w.id : latest;
-  }, null);
+  const lastAccessedId = workouts
+    .filter((w) => w.lastAccessed)
+    .sort((a, b) => (b.lastAccessed ?? 0) - (a.lastAccessed ?? 0))[0]?.id ?? null;
 
   const handleDelete = (e: React.MouseEvent, id: string, name: string) => {
     e.stopPropagation();
@@ -32,11 +29,6 @@ export function WorkoutList({ workouts, onSelectWorkout, onAddWorkout, onEditWor
   return (
     <div className="flex flex-col min-h-dvh bg-gray-100 safe-area-inset">
       <header className="bg-red-500 text-white px-4 py-3 flex items-center gap-3 sticky top-0 z-10 shadow-md">
-        <button className="p-2 -ml-1 min-w-11 min-h-11 flex items-center justify-center">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-            <path d="M3 12h18M3 6h18M3 18h18" />
-          </svg>
-        </button>
         <h1 className="text-xl font-bold">Treino</h1>
       </header>
 
