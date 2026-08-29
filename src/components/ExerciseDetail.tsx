@@ -1,5 +1,7 @@
+import { useState, useEffect } from 'react';
 import { ArrowLeft, ArrowRight, ArrowUp, Dumbbell, Check } from 'lucide-react';
 import type { Exercise } from '../types/workout';
+import { getImage, isIdbImageKey } from '../hooks/useWorkoutDB';
 
 interface ExerciseDetailProps {
   exercise: Exercise;
@@ -25,6 +27,33 @@ export function ExerciseDetail({
   onUpdateSeries,
 }: ExerciseDetailProps) {
   const progress = totalSeriesInWorkout > 0 ? Math.round((completedSeriesInWorkout / totalSeriesInWorkout) * 100) : 0;
+  const [imageUrl, setImageUrl] = useState<string | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    let objectUrl: string | null = null;
+
+    const loadImage = async () => {
+      if (isIdbImageKey(exercise.image)) {
+        const url = await getImage(exercise.id);
+        if (!cancelled) {
+          objectUrl = url;
+          setImageUrl(url);
+        }
+      } else if (exercise.image) {
+        if (!cancelled) setImageUrl(exercise.image);
+      } else {
+        if (!cancelled) setImageUrl(null);
+      }
+    };
+
+    loadImage();
+
+    return () => {
+      cancelled = true;
+      if (objectUrl) URL.revokeObjectURL(objectUrl);
+    };
+  }, [exercise.id, exercise.image]);
 
   return (
     <div className="flex flex-col min-h-dvh bg-gray-100 safe-area-inset">
@@ -39,9 +68,19 @@ export function ExerciseDetail({
         <div className="bg-white rounded-lg shadow p-4 sm:p-6">
           <h2 className="text-lg sm:text-xl font-bold text-gray-800 text-center mb-3 sm:mb-4">{exercise.name}</h2>
 
-          <div className="w-32 h-32 sm:w-48 sm:h-48 mx-auto bg-gray-100 rounded-full flex items-center justify-center mb-4">
-            <Dumbbell size={48} className="text-red-500 sm:hidden" />
-            <Dumbbell size={64} className="text-red-500 hidden sm:block" />
+          <div className="w-32 h-32 sm:w-48 sm:h-48 mx-auto bg-gray-100 rounded-full flex items-center justify-center mb-4 overflow-hidden">
+            {imageUrl ? (
+              <img
+                src={imageUrl}
+                alt={exercise.name}
+                className="w-full h-full object-cover"
+              />
+            ) : (
+              <>
+                <Dumbbell size={48} className="text-red-500 sm:hidden" />
+                <Dumbbell size={64} className="text-red-500 hidden sm:block" />
+              </>
+            )}
           </div>
 
           <p className="text-center text-gray-600 text-sm sm:text-base mb-4 sm:mb-6">

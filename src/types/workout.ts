@@ -8,6 +8,7 @@ export interface Series {
 export interface Exercise {
   id: string;
   name: string;
+  image?: string;
   recommendedSets: number;
   recommendedRepsMin: number;
   recommendedRepsMax: number;

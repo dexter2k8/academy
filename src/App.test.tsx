@@ -3,8 +3,13 @@ import { render, screen } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import App from './App';
 
-vi.mock('./hooks/useLocalStorage', () => ({
-  useLocalStorage: (_key: string, initialValue: unknown) => [initialValue, vi.fn()],
+vi.mock('./hooks/useWorkoutDB', () => ({
+  useWorkoutDB: (_initialValue: unknown) => ({ workouts: _initialValue, setWorkouts: vi.fn(), loaded: true }),
+  saveImage: vi.fn(),
+  getImage: vi.fn(),
+  deleteImage: vi.fn(),
+  resolveImageUrl: vi.fn(),
+  isIdbImageKey: vi.fn(() => false),
 }));
 
 describe('App', () => {

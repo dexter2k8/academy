@@ -1,6 +1,7 @@
-import { useState } from 'react';
-import { ArrowLeft, Plus, Trash2 } from 'lucide-react';
+import { useState, useRef } from 'react';
+import { ArrowLeft, Plus, Trash2, Upload, X } from 'lucide-react';
 import type { Workout, Exercise } from '../types/workout';
+import { saveImage, deleteImage, isIdbImageKey } from '../hooks/useWorkoutDB';
 
 interface WorkoutFormProps {
   workout?: Workout;
@@ -19,6 +20,7 @@ export function WorkoutForm({ workout, onSave, onCancel }: WorkoutFormProps) {
       {
         id: generateId(),
         name: '',
+        image: '',
         recommendedSets: 3,
         recommendedRepsMin: 15,
         recommendedRepsMax: 20,
@@ -31,6 +33,30 @@ export function WorkoutForm({ workout, onSave, onCancel }: WorkoutFormProps) {
       },
     ]
   );
+  const fileInputRefs = useRef<Record<string, HTMLInputElement | null>>({});
+
+  const handleUploadImage = async (exerciseId: string, file: File) => {
+    if (!file.type.startsWith('image/')) return;
+    await saveImage(exerciseId, file);
+    setExercises(
+      exercises.map((e) => (e.id === exerciseId ? { ...e, image: exerciseId } : e))
+    );
+  };
+
+  const handleUrlImage = (exerciseId: string, url: string) => {
+    setExercises(
+      exercises.map((e) => (e.id === exerciseId ? { ...e, image: url } : e))
+    );
+  };
+
+  const handleRemoveImage = async (exerciseId: string) => {
+    if (isIdbImageKey(exercises.find((e) => e.id === exerciseId)?.image)) {
+      await deleteImage(exerciseId);
+    }
+    setExercises(
+      exercises.map((e) => (e.id === exerciseId ? { ...e, image: '' } : e))
+    );
+  };
 
   const addExercise = () => {
     setExercises([
@@ -137,6 +163,52 @@ export function WorkoutForm({ workout, onSave, onCancel }: WorkoutFormProps) {
                     placeholder="Ex: Curl com barra"
                     className="w-full border border-gray-300 rounded px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-red-500 text-sm sm:text-base min-h-[44px]"
                   />
+                </div>
+
+                <div>
+                  <label className="block text-xs sm:text-sm text-gray-600 mb-1">Imagem</label>
+                  {exercise.image && (
+                    <div className="relative mb-2">
+                      <img
+                        src={isIdbImageKey(exercise.image) ? undefined : exercise.image}
+                        alt={exercise.name}
+                        className="w-full h-32 object-cover rounded-lg bg-gray-100"
+                      />
+                      <button
+                        onClick={() => handleRemoveImage(exercise.id)}
+                        className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1 min-w-[28px] min-h-[28px] flex items-center justify-center"
+                      >
+                        <X size={14} />
+                      </button>
+                    </div>
+                  )}
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => fileInputRefs.current[exercise.id]?.click()}
+                      className="flex-1 flex items-center justify-center gap-1 border border-gray-300 rounded px-2 py-2 text-xs sm:text-sm text-gray-600 active:bg-gray-50 min-h-[40px]"
+                    >
+                      <Upload size={14} />
+                      <span>Upload</span>
+                    </button>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      className="hidden"
+                      ref={(el) => { fileInputRefs.current[exercise.id] = el; }}
+                      onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        if (file) handleUploadImage(exercise.id, file);
+                        e.target.value = '';
+                      }}
+                    />
+                    <input
+                      type="url"
+                      value={isIdbImageKey(exercise.image) ? '' : (exercise.image || '')}
+                      onChange={(e) => handleUrlImage(exercise.id, e.target.value)}
+                      placeholder="Ou cole a URL da imagem"
+                      className="flex-1 border border-gray-300 rounded px-3 py-2 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-red-500 min-h-[40px]"
+                    />
+                  </div>
                 </div>
 
                 <div className="grid grid-cols-2 gap-2 sm:gap-3">

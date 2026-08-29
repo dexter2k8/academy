@@ -1,6 +1,6 @@
 import { useState, useCallback } from 'react';
 import type { Workout, ViewType } from './types/workout';
-import { useLocalStorage } from './hooks/useLocalStorage';
+import { useWorkoutDB } from './hooks/useWorkoutDB';
 import { WorkoutList } from './components/WorkoutList';
 import { WorkoutDetail } from './components/WorkoutDetail';
 import { ExerciseDetail } from './components/ExerciseDetail';
@@ -127,7 +127,7 @@ const initialWorkouts: Workout[] = [
 ];
 
 function App() {
-  const [workouts, setWorkouts] = useLocalStorage<Workout[]>('workouts', initialWorkouts);
+  const { workouts, setWorkouts, loaded } = useWorkoutDB(initialWorkouts);
 
   const [view, setView] = useState<ViewType>('list');
   const [selectedWorkoutId, setSelectedWorkoutId] = useState<string | null>(null);
@@ -271,6 +271,14 @@ function App() {
       setEditingWorkout(null);
     }
   }, [view]);
+
+  if (!loaded) {
+    return (
+      <div className="flex items-center justify-center min-h-dvh bg-gray-100">
+        <div className="text-gray-500">Carregando...</div>
+      </div>
+    );
+  }
 
   if (view === 'crud') {
     return (
