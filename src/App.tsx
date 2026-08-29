@@ -14,6 +14,7 @@ const initialWorkouts: Workout[] = [
       {
         id: 'e1',
         name: 'Curl com barra',
+        type: 'repetition',
         recommendedSets: 3,
         recommendedRepsMin: 15,
         recommendedRepsMax: 20,
@@ -27,6 +28,7 @@ const initialWorkouts: Workout[] = [
       {
         id: 'e2',
         name: 'Curl com barra agarro afastado',
+        type: 'repetition',
         recommendedSets: 3,
         recommendedRepsMin: 15,
         recommendedRepsMax: 20,
@@ -40,6 +42,7 @@ const initialWorkouts: Workout[] = [
       {
         id: 'e3',
         name: 'Curl com barra ez',
+        type: 'repetition',
         recommendedSets: 3,
         recommendedRepsMin: 15,
         recommendedRepsMax: 20,
@@ -53,6 +56,7 @@ const initialWorkouts: Workout[] = [
       {
         id: 'e4',
         name: 'Curl com barra ez agarro afastado',
+        type: 'repetition',
         recommendedSets: 3,
         recommendedRepsMin: 15,
         recommendedRepsMax: 20,
@@ -66,6 +70,7 @@ const initialWorkouts: Workout[] = [
       {
         id: 'e5',
         name: 'Curl scott com barra',
+        type: 'repetition',
         recommendedSets: 3,
         recommendedRepsMin: 15,
         recommendedRepsMax: 20,
@@ -79,6 +84,7 @@ const initialWorkouts: Workout[] = [
       {
         id: 'e6',
         name: 'Curl scott com barra em pé',
+        type: 'repetition',
         recommendedSets: 3,
         recommendedRepsMin: 15,
         recommendedRepsMax: 20,
@@ -99,6 +105,7 @@ const initialWorkouts: Workout[] = [
       {
         id: 'e7',
         name: 'Supino reto',
+        type: 'repetition',
         recommendedSets: 3,
         recommendedRepsMin: 10,
         recommendedRepsMax: 12,
@@ -112,6 +119,7 @@ const initialWorkouts: Workout[] = [
       {
         id: 'e8',
         name: 'Supino inclinado',
+        type: 'repetition',
         recommendedSets: 3,
         recommendedRepsMin: 10,
         recommendedRepsMax: 12,
@@ -120,6 +128,22 @@ const initialWorkouts: Workout[] = [
           { id: 's22', reps: 12, weight: 8, completed: false },
           { id: 's23', reps: 10, weight: 8, completed: false },
           { id: 's24', reps: 10, weight: 8, completed: false },
+        ],
+      },
+      {
+        id: 'e9',
+        name: 'Prancha',
+        type: 'timed',
+        recommendedSets: 3,
+        recommendedRepsMin: 0,
+        recommendedRepsMax: 0,
+        recommendedWeight: 0,
+        duration: 30,
+        series: [],
+        timedSeries: [
+          { id: 's25', completed: false },
+          { id: 's26', completed: false },
+          { id: 's27', completed: false },
         ],
       },
     ],
@@ -173,6 +197,25 @@ function App() {
     [selectedWorkoutId, setWorkouts]
   );
 
+  const handleUpdateTimedSeries = useCallback(
+    (seriesId: string, completed: boolean) => {
+      if (!selectedWorkoutId) return;
+      setWorkouts((prev) =>
+        prev.map((w) => {
+          if (w.id !== selectedWorkoutId) return w;
+          return {
+            ...w,
+            exercises: w.exercises.map((e) => ({
+              ...e,
+              timedSeries: e.timedSeries?.map((s) => (s.id === seriesId ? { ...s, completed } : s)),
+            })),
+          };
+        })
+      );
+    },
+    [selectedWorkoutId, setWorkouts]
+  );
+
   const handleNextExercise = useCallback(() => {
     if (!selectedWorkout || selectedExerciseIndex < 0 || !selectedWorkoutId) return;
     
@@ -189,6 +232,7 @@ function App() {
             return {
               ...e,
               series: e.series.map((s) => ({ ...s, completed: true })),
+              timedSeries: e.timedSeries?.map((s) => ({ ...s, completed: true })),
             };
           }),
         };
@@ -212,6 +256,7 @@ function App() {
           exercises: w.exercises.map((e) => ({
             ...e,
             series: e.series.map((s) => ({ ...s, completed: false })),
+            timedSeries: e.timedSeries?.map((s) => ({ ...s, completed: false })),
           })),
         };
       })
@@ -318,6 +363,7 @@ function App() {
         }
         onFinish={handleFinishExercise}
         onUpdateSeries={handleUpdateSeries}
+        onUpdateTimedSeries={handleUpdateTimedSeries}
       />
     );
   }

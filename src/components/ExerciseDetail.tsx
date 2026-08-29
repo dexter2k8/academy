@@ -1,7 +1,8 @@
-import { useState, useEffect } from 'react';
-import { ArrowLeft, ArrowRight, ArrowUp, Dumbbell, Check } from 'lucide-react';
+import { useState, useEffect, useCallback } from 'react';
+import { ArrowLeft, ArrowRight, ArrowUp, Dumbbell, Check, Timer as TimerIcon } from 'lucide-react';
 import type { Exercise } from '../types/workout';
 import { getImage, isIdbImageKey } from '../hooks/useWorkoutDB';
+import { Timer } from './Timer';
 
 interface ExerciseDetailProps {
   exercise: Exercise;
@@ -13,6 +14,7 @@ interface ExerciseDetailProps {
   onNext?: () => void;
   onFinish: () => void;
   onUpdateSeries: (seriesId: string, field: 'reps' | 'weight' | 'completed', value: number | boolean) => void;
+  onUpdateTimedSeries?: (seriesId: string, completed: boolean) => void;
 }
 
 export function ExerciseDetail({
@@ -25,9 +27,11 @@ export function ExerciseDetail({
   onNext,
   onFinish,
   onUpdateSeries,
+  onUpdateTimedSeries,
 }: ExerciseDetailProps) {
   const progress = totalSeriesInWorkout > 0 ? Math.round((completedSeriesInWorkout / totalSeriesInWorkout) * 100) : 0;
   const [imageUrl, setImageUrl] = useState<string | null>(null);
+  const [currentTimedSeriesIndex, setCurrentTimedSeriesIndex] = useState(0);
 
   useEffect(() => {
     let cancelled = false;
@@ -54,6 +58,25 @@ export function ExerciseDetail({
       if (objectUrl) URL.revokeObjectURL(objectUrl);
     };
   }, [exercise.id, exercise.image]);
+
+  const handleTimedSeriesComplete = useCallback(() => {
+    if (!exercise.timedSeries || !onUpdateTimedSeries) return;
+    const currentSeries = exercise.timedSeries[currentTimedSeriesIndex];
+    if (currentSeries) {
+      onUpdateTimedSeries(currentSeries.id, true);
+      if (currentTimedSeriesIndex < exercise.timedSeries.length - 1) {
+        setCurrentTimedSeriesIndex((prev) => prev + 1);
+      }
+    }
+  }, [exercise.timedSeries, currentTimedSeriesIndex, onUpdateTimedSeries]);
+
+  const isTimedExercise = exercise.type === 'timed';
+  const completedSeries = isTimedExercise
+    ? exercise.timedSeries?.filter((s) => s.completed).length || 0
+    : exercise.series.filter((s) => s.completed).length;
+  const totalSeries = isTimedExercise
+    ? exercise.timedSeries?.length || 0
+    : exercise.series.length;
 
   return (
     <div className="flex flex-col min-h-dvh bg-gray-100 safe-area-inset">
@@ -83,46 +106,94 @@ export function ExerciseDetail({
             )}
           </div>
 
-          <p className="text-center text-gray-600 text-sm sm:text-base mb-4 sm:mb-6">
-            Recomendado: {exercise.series.length} x {exercise.recommendedRepsMin}-{exercise.recommendedRepsMax} [{exercise.recommendedWeight}K Carga]
-          </p>
+          {isTimedExercise ? (
+            <>
+              <p className="text-center text-gray-600 text-sm sm:text-base mb-4 sm:mb-6">
+                <TimerIcon size={16} className="inline mr-1" />
+                {exercise.series.length} x {exercise.duration || 30}s
+              </p>
 
-          <div className="space-y-3 sm:space-y-4">
-            {exercise.series.map((series, index) => (
-              <div key={series.id} className="flex items-center gap-2 sm:gap-3 p-3 bg-gray-50 rounded-lg">
-                <span className="font-medium text-gray-700 w-8 text-sm sm:text-base">{index + 1}ª</span>
-                
-                <div className="flex-1 flex items-center gap-2">
-                  <label className="text-xs text-gray-500 hidden sm:inline">Reps:</label>
-                  <input
-                    type="number"
-                    value={series.reps}
-                    onChange={(e) => onUpdateSeries(series.id, 'reps', parseInt(e.target.value) || 0)}
-                    className="w-16 sm:w-20 border border-gray-300 rounded px-2 py-2 text-center text-sm sm:text-base focus:outline-none focus:ring-2 focus:ring-red-500 min-h-[44px]"
-                  />
-                </div>
-
-                <div className="flex-1 flex items-center gap-2">
-                  <label className="text-xs text-gray-500 hidden sm:inline">Carga:</label>
-                  <input
-                    type="number"
-                    value={series.weight}
-                    onChange={(e) => onUpdateSeries(series.id, 'weight', parseFloat(e.target.value) || 0)}
-                    className="w-16 sm:w-20 border border-gray-300 rounded px-2 py-2 text-center text-sm sm:text-base focus:outline-none focus:ring-2 focus:ring-red-500 min-h-[44px]"
-                  />
-                </div>
-
-                <button
-                  onClick={() => onUpdateSeries(series.id, 'completed', !series.completed)}
-                  className={`w-10 h-10 sm:w-11 sm:h-11 rounded flex items-center justify-center shrink-0 transition-colors ${
-                    series.completed ? 'bg-green-500' : 'bg-gray-200 active:bg-gray-300'
-                  }`}
-                >
-                  {series.completed && <Check size={18} className="text-white" />}
-                </button>
+              <div className="mb-4">
+                <p className="text-center text-sm text-gray-500 mb-2">
+                  Série {currentTimedSeriesIndex + 1} de {exercise.timedSeries?.length || 0}
+                </p>
+                <Timer
+                  key={`${exercise.id}-${currentTimedSeriesIndex}`}
+                  duration={exercise.duration || 30}
+                  onComplete={handleTimedSeriesComplete}
+                />
               </div>
-            ))}
-          </div>
+
+              <div className="space-y-2">
+                {exercise.timedSeries?.map((series, index) => (
+                  <div
+                    key={series.id}
+                    className={`flex items-center justify-between p-3 rounded-lg ${
+                      series.completed ? 'bg-green-50' : index === currentTimedSeriesIndex ? 'bg-red-50' : 'bg-gray-50'
+                    }`}
+                  >
+                    <span className="font-medium text-gray-700 text-sm">
+                      {index + 1}ª Série
+                    </span>
+                    <div className="flex items-center gap-2">
+                      <span className="text-sm text-gray-500">{exercise.duration || 30}s</span>
+                      <button
+                        onClick={() => onUpdateTimedSeries?.(series.id, !series.completed)}
+                        className={`w-10 h-10 sm:w-11 sm:h-11 rounded flex items-center justify-center shrink-0 transition-colors ${
+                          series.completed ? 'bg-green-500' : 'bg-gray-200 active:bg-gray-300'
+                        }`}
+                      >
+                        {series.completed && <Check size={18} className="text-white" />}
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </>
+          ) : (
+            <>
+              <p className="text-center text-gray-600 text-sm sm:text-base mb-4 sm:mb-6">
+                Recomendado: {exercise.series.length} x {exercise.recommendedRepsMin}-{exercise.recommendedRepsMax} [{exercise.recommendedWeight}K Carga]
+              </p>
+
+              <div className="space-y-3 sm:space-y-4">
+                {exercise.series.map((series, index) => (
+                  <div key={series.id} className="flex items-center gap-2 sm:gap-3 p-3 bg-gray-50 rounded-lg">
+                    <span className="font-medium text-gray-700 w-8 text-sm sm:text-base">{index + 1}ª</span>
+                    
+                    <div className="flex-1 flex items-center gap-2">
+                      <label className="text-xs text-gray-500 hidden sm:inline">Reps:</label>
+                      <input
+                        type="number"
+                        value={series.reps}
+                        onChange={(e) => onUpdateSeries(series.id, 'reps', parseInt(e.target.value) || 0)}
+                        className="w-16 sm:w-20 border border-gray-300 rounded px-2 py-2 text-center text-sm sm:text-base focus:outline-none focus:ring-2 focus:ring-red-500 min-h-[44px]"
+                      />
+                    </div>
+
+                    <div className="flex-1 flex items-center gap-2">
+                      <label className="text-xs text-gray-500 hidden sm:inline">Carga:</label>
+                      <input
+                        type="number"
+                        value={series.weight}
+                        onChange={(e) => onUpdateSeries(series.id, 'weight', parseFloat(e.target.value) || 0)}
+                        className="w-16 sm:w-20 border border-gray-300 rounded px-2 py-2 text-center text-sm sm:text-base focus:outline-none focus:ring-2 focus:ring-red-500 min-h-[44px]"
+                      />
+                    </div>
+
+                    <button
+                      onClick={() => onUpdateSeries(series.id, 'completed', !series.completed)}
+                      className={`w-10 h-10 sm:w-11 sm:h-11 rounded flex items-center justify-center shrink-0 transition-colors ${
+                        series.completed ? 'bg-green-500' : 'bg-gray-200 active:bg-gray-300'
+                      }`}
+                    >
+                      {series.completed && <Check size={18} className="text-white" />}
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </>
+          )}
 
           <div className="mt-4 sm:mt-6">
             {onNext ? (
@@ -149,7 +220,7 @@ export function ExerciseDetail({
       <footer className="bg-white border-t border-gray-200 px-4 py-3 flex justify-between items-center sticky bottom-0 z-10 safe-area-bottom">
         <div className="flex items-center gap-2 text-gray-600">
           <Dumbbell size={18} />
-          <span className="text-xs sm:text-sm">Feito {completedSeriesInWorkout} de {totalSeriesInWorkout}</span>
+          <span className="text-xs sm:text-sm">Feito {completedSeries} de {totalSeries}</span>
         </div>
         <div className="flex items-center gap-2 text-gray-600">
           <span className="text-xs sm:text-base font-medium">{progress}% Completo</span>

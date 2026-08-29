@@ -1,4 +1,4 @@
-import { ArrowLeft, Check, Dumbbell, Pencil } from 'lucide-react';
+import { ArrowLeft, Check, Dumbbell, Pencil, Timer } from 'lucide-react';
 import type { Workout } from '../types/workout';
 
 interface WorkoutDetailProps {
@@ -9,7 +9,12 @@ interface WorkoutDetailProps {
 }
 
 export function WorkoutDetail({ workout, onBack, onSelectExercise, onEditWorkout }: WorkoutDetailProps) {
-  const completedCount = workout.exercises.filter((e) => e.series.every((s) => s.completed)).length;
+  const completedCount = workout.exercises.filter((e) => {
+    if (e.type === 'timed') {
+      return e.timedSeries?.every((s) => s.completed) ?? false;
+    }
+    return e.series.every((s) => s.completed);
+  }).length;
   const totalExercises = workout.exercises.length;
   const progress = totalExercises > 0 ? Math.round((completedCount / totalExercises) * 100) : 0;
 
@@ -32,8 +37,16 @@ export function WorkoutDetail({ workout, onBack, onSelectExercise, onEditWorkout
       <main className="flex-1 p-3 sm:p-4 pb-20">
         <div className="bg-white rounded-lg shadow overflow-hidden">
           {workout.exercises.map((exercise) => {
-            const isCompleted = exercise.series.every((s) => s.completed);
-            const completedSeries = exercise.series.filter((s) => s.completed).length;
+            const isTimed = exercise.type === 'timed';
+            const isCompleted = isTimed
+              ? exercise.timedSeries?.every((s) => s.completed) ?? false
+              : exercise.series.every((s) => s.completed);
+            const completedSeries = isTimed
+              ? exercise.timedSeries?.filter((s) => s.completed).length || 0
+              : exercise.series.filter((s) => s.completed).length;
+            const totalSeries = isTimed
+              ? exercise.timedSeries?.length || 0
+              : exercise.series.length;
 
             return (
               <button
@@ -51,11 +64,20 @@ export function WorkoutDetail({ workout, onBack, onSelectExercise, onEditWorkout
                 <div className="flex-1 min-w-0">
                   <p className="text-gray-800 font-medium text-sm sm:text-base truncate">{exercise.name}</p>
                   <p className="text-xs sm:text-sm text-gray-500">
-                    {exercise.series.length} x {exercise.recommendedRepsMin}-{exercise.recommendedRepsMax} [{exercise.recommendedWeight}K Carga]
+                    {isTimed ? (
+                      <>
+                        <Timer size={12} className="inline mr-1" />
+                        {exercise.series.length} x {exercise.duration || 30}s
+                      </>
+                    ) : (
+                      <>
+                        {exercise.series.length} x {exercise.recommendedRepsMin}-{exercise.recommendedRepsMax} [{exercise.recommendedWeight}K Carga]
+                      </>
+                    )}
                   </p>
                 </div>
                 <div className="text-xs sm:text-sm text-gray-500 shrink-0">
-                  {completedSeries}/{exercise.series.length}
+                  {completedSeries}/{totalSeries}
                 </div>
               </button>
             );

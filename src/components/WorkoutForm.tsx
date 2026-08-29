@@ -1,5 +1,5 @@
 import { useState, useRef } from 'react';
-import { ArrowLeft, Plus, Trash2, Upload, X } from 'lucide-react';
+import { ArrowLeft, Plus, Trash2, Upload, X, Timer, Dumbbell } from 'lucide-react';
 import type { Workout, Exercise } from '../types/workout';
 import { saveImage, deleteImage, isIdbImageKey } from '../hooks/useWorkoutDB';
 
@@ -21,6 +21,7 @@ export function WorkoutForm({ workout, onSave, onCancel }: WorkoutFormProps) {
         id: generateId(),
         name: '',
         image: '',
+        type: 'repetition',
         recommendedSets: 3,
         recommendedRepsMin: 15,
         recommendedRepsMax: 20,
@@ -64,6 +65,8 @@ export function WorkoutForm({ workout, onSave, onCancel }: WorkoutFormProps) {
       {
         id: generateId(),
         name: '',
+        image: '',
+        type: 'repetition',
         recommendedSets: 3,
         recommendedRepsMin: 15,
         recommendedRepsMax: 20,
@@ -86,20 +89,48 @@ export function WorkoutForm({ workout, onSave, onCancel }: WorkoutFormProps) {
       exercises.map((e) => {
         if (e.id !== exerciseId) return e;
         const updated = { ...e, [field]: value };
-        if (field === 'recommendedSets' && typeof value === 'number') {
-          const diff = value - e.series.length;
-          if (diff > 0) {
+        
+        if (field === 'type') {
+          if (value === 'timed') {
+            updated.timedSeries = Array.from({ length: e.recommendedSets }, () => ({
+              id: generateId(),
+              completed: false,
+            }));
+            updated.series = [];
+          } else {
             updated.series = [
               ...e.series,
-              ...Array.from({ length: diff }, () => ({
+              ...Array.from({ length: Math.max(0, e.recommendedSets - e.series.length) }, () => ({
                 id: generateId(),
                 reps: e.recommendedRepsMin,
                 weight: e.recommendedWeight,
                 completed: false,
               })),
-            ];
-          } else if (diff < 0) {
-            updated.series = e.series.slice(0, value);
+            ].slice(0, e.recommendedSets);
+            updated.timedSeries = [];
+          }
+        }
+        
+        if (field === 'recommendedSets' && typeof value === 'number') {
+          if (e.type === 'timed') {
+            updated.timedSeries = Array.from({ length: value }, (_, i) => 
+              e.timedSeries?.[i] || { id: generateId(), completed: false }
+            );
+          } else {
+            const diff = value - e.series.length;
+            if (diff > 0) {
+              updated.series = [
+                ...e.series,
+                ...Array.from({ length: diff }, () => ({
+                  id: generateId(),
+                  reps: e.recommendedRepsMin,
+                  weight: e.recommendedWeight,
+                  completed: false,
+                })),
+              ];
+            } else if (diff < 0) {
+              updated.series = e.series.slice(0, value);
+            }
           }
         }
         return updated;
@@ -166,6 +197,36 @@ export function WorkoutForm({ workout, onSave, onCancel }: WorkoutFormProps) {
                 </div>
 
                 <div>
+                  <label className="block text-xs sm:text-sm text-gray-600 mb-1">Tipo de Exercício</label>
+                  <div className="flex gap-2">
+                    <button
+                      type="button"
+                      onClick={() => updateExercise(exercise.id, 'type', 'repetition')}
+                      className={`flex-1 flex items-center justify-center gap-2 border rounded px-3 py-2.5 text-sm sm:text-base min-h-[44px] transition-colors ${
+                        exercise.type === 'repetition'
+                          ? 'border-red-500 bg-red-50 text-red-600'
+                          : 'border-gray-300 text-gray-600 active:bg-gray-50'
+                      }`}
+                    >
+                      <Dumbbell size={18} />
+                      <span>Repetição</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => updateExercise(exercise.id, 'type', 'timed')}
+                      className={`flex-1 flex items-center justify-center gap-2 border rounded px-3 py-2.5 text-sm sm:text-base min-h-[44px] transition-colors ${
+                        exercise.type === 'timed'
+                          ? 'border-red-500 bg-red-50 text-red-600'
+                          : 'border-gray-300 text-gray-600 active:bg-gray-50'
+                      }`}
+                    >
+                      <Timer size={18} />
+                      <span>Temporizado</span>
+                    </button>
+                  </div>
+                </div>
+
+                <div>
                   <label className="block text-xs sm:text-sm text-gray-600 mb-1">Imagem</label>
                   {exercise.image && (
                     <div className="relative mb-2">
@@ -222,41 +283,56 @@ export function WorkoutForm({ workout, onSave, onCancel }: WorkoutFormProps) {
                       className="w-full border border-gray-300 rounded px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-red-500 text-sm sm:text-base min-h-[44px]"
                     />
                   </div>
-                  <div>
-                    <label className="block text-xs sm:text-sm text-gray-600 mb-1">Carga (Kg)</label>
-                    <input
-                      type="number"
-                      value={exercise.recommendedWeight}
-                      onChange={(e) => updateExercise(exercise.id, 'recommendedWeight', parseFloat(e.target.value) || 0)}
-                      min="0"
-                      step="0.5"
-                      className="w-full border border-gray-300 rounded px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-red-500 text-sm sm:text-base min-h-[44px]"
-                    />
-                  </div>
+                  {exercise.type === 'repetition' ? (
+                    <div>
+                      <label className="block text-xs sm:text-sm text-gray-600 mb-1">Carga (Kg)</label>
+                      <input
+                        type="number"
+                        value={exercise.recommendedWeight}
+                        onChange={(e) => updateExercise(exercise.id, 'recommendedWeight', parseFloat(e.target.value) || 0)}
+                        min="0"
+                        step="0.5"
+                        className="w-full border border-gray-300 rounded px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-red-500 text-sm sm:text-base min-h-[44px]"
+                      />
+                    </div>
+                  ) : (
+                    <div>
+                      <label className="block text-xs sm:text-sm text-gray-600 mb-1">Duração (seg)</label>
+                      <input
+                        type="number"
+                        value={exercise.duration || 30}
+                        onChange={(e) => updateExercise(exercise.id, 'duration', parseInt(e.target.value) || 30)}
+                        min="1"
+                        className="w-full border border-gray-300 rounded px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-red-500 text-sm sm:text-base min-h-[44px]"
+                      />
+                    </div>
+                  )}
                 </div>
 
-                <div className="grid grid-cols-2 gap-2 sm:gap-3">
-                  <div>
-                    <label className="block text-xs sm:text-sm text-gray-600 mb-1">Reps Mín</label>
-                    <input
-                      type="number"
-                      value={exercise.recommendedRepsMin}
-                      onChange={(e) => updateExercise(exercise.id, 'recommendedRepsMin', parseInt(e.target.value) || 1)}
-                      min="1"
-                      className="w-full border border-gray-300 rounded px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-red-500 text-sm sm:text-base min-h-[44px]"
-                    />
+                {exercise.type === 'repetition' && (
+                  <div className="grid grid-cols-2 gap-2 sm:gap-3">
+                    <div>
+                      <label className="block text-xs sm:text-sm text-gray-600 mb-1">Reps Mín</label>
+                      <input
+                        type="number"
+                        value={exercise.recommendedRepsMin}
+                        onChange={(e) => updateExercise(exercise.id, 'recommendedRepsMin', parseInt(e.target.value) || 1)}
+                        min="1"
+                        className="w-full border border-gray-300 rounded px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-red-500 text-sm sm:text-base min-h-[44px]"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs sm:text-sm text-gray-600 mb-1">Reps Máx</label>
+                      <input
+                        type="number"
+                        value={exercise.recommendedRepsMax}
+                        onChange={(e) => updateExercise(exercise.id, 'recommendedRepsMax', parseInt(e.target.value) || 1)}
+                        min="1"
+                        className="w-full border border-gray-300 rounded px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-red-500 text-sm sm:text-base min-h-[44px]"
+                      />
+                    </div>
                   </div>
-                  <div>
-                    <label className="block text-xs sm:text-sm text-gray-600 mb-1">Reps Máx</label>
-                    <input
-                      type="number"
-                      value={exercise.recommendedRepsMax}
-                      onChange={(e) => updateExercise(exercise.id, 'recommendedRepsMax', parseInt(e.target.value) || 1)}
-                      min="1"
-                      className="w-full border border-gray-300 rounded px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-red-500 text-sm sm:text-base min-h-[44px]"
-                    />
-                  </div>
-                </div>
+                )}
               </div>
             </div>
           ))}
