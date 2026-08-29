@@ -31,7 +31,11 @@ export function ExerciseDetail({
 }: ExerciseDetailProps) {
   const progress = totalSeriesInWorkout > 0 ? Math.round((completedSeriesInWorkout / totalSeriesInWorkout) * 100) : 0;
   const [imageUrl, setImageUrl] = useState<string | null>(null);
-  const [currentTimedSeriesIndex, setCurrentTimedSeriesIndex] = useState(0);
+  const [currentTimedSeriesIndex, setCurrentTimedSeriesIndex] = useState(() => {
+    if (exercise.type !== 'timed' || !exercise.timedSeries) return 0;
+    const firstUnchecked = exercise.timedSeries.findIndex((s) => !s.completed);
+    return firstUnchecked === -1 ? exercise.timedSeries.length - 1 : firstUnchecked;
+  });
 
   useEffect(() => {
     let cancelled = false;
