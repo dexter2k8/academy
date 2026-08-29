@@ -32,7 +32,7 @@ export function WorkoutList({ workouts, onSelectWorkout, onAddWorkout, onEditWor
   return (
     <div className="flex flex-col min-h-dvh bg-gray-100 safe-area-inset">
       <header className="bg-red-500 text-white px-4 py-3 flex items-center gap-3 sticky top-0 z-10 shadow-md">
-        <button className="p-2 -ml-1 min-w-[44px] min-h-[44px] flex items-center justify-center">
+        <button className="p-2 -ml-1 min-w-11 min-h-11 flex items-center justify-center">
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
             <path d="M3 12h18M3 6h18M3 18h18" />
           </svg>
@@ -48,7 +48,7 @@ export function WorkoutList({ workouts, onSelectWorkout, onAddWorkout, onEditWor
           {workouts.map((workout, index) => (
             <div
               key={workout.id}
-              className={`flex items-center border-b border-gray-100 min-h-[56px] ${
+              className={`flex items-center border-b border-gray-100 min-h-14 ${
                 workout.id === lastAccessedId ? 'font-bold' : ''
               }`}
             >
@@ -68,14 +68,14 @@ export function WorkoutList({ workouts, onSelectWorkout, onAddWorkout, onEditWor
               <div className="flex items-center pr-2 gap-1">
                 <button
                   onClick={(e) => handleEdit(e, workout.id)}
-                  className="p-2 text-gray-400 hover:text-blue-500 active:text-blue-600 min-w-[40px] min-h-[40px] flex items-center justify-center"
+                  className="p-2 text-gray-400 hover:text-blue-500 active:text-blue-600 min-w-10 min-h-10 flex items-center justify-center"
                   title="Editar"
                 >
                   <Pencil size={18} />
                 </button>
                 <button
                   onClick={(e) => handleDelete(e, workout.id, workout.name)}
-                  className="p-2 text-gray-400 hover:text-red-500 active:text-red-600 min-w-[40px] min-h-[40px] flex items-center justify-center"
+                  className="p-2 text-gray-400 hover:text-red-500 active:text-red-600 min-w-10 min-h-10 flex items-center justify-center"
                   title="Excluir"
                 >
                   <Trash2 size={18} />
@@ -86,7 +86,7 @@ export function WorkoutList({ workouts, onSelectWorkout, onAddWorkout, onEditWor
 
           <button
             onClick={onAddWorkout}
-            className="w-full flex items-center justify-center px-4 py-3 sm:py-4 text-red-500 active:bg-gray-50 transition-colors min-h-[56px]"
+            className="w-full flex items-center justify-center px-4 py-3 sm:py-4 text-red-500 active:bg-gray-50 transition-colors min-h-14"
           >
             <span className="text-2xl mr-2 leading-none">+</span>
             <span className="text-sm sm:text-base">Adicionar Treino</span>

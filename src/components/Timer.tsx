@@ -1,5 +1,5 @@
-import { useState, useEffect, useCallback, useRef } from 'react';
-import { Play, Pause, RotateCcw } from 'lucide-react';
+import { useState, useEffect, useCallback, useRef } from "react";
+import { Play, Pause, RotateCcw } from "lucide-react";
 
 interface TimerProps {
   duration: number;
@@ -56,21 +56,14 @@ export function Timer({ duration, onComplete }: TimerProps) {
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;
-    return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+    return `${mins.toString().padStart(2, "0")}:${secs.toString().padStart(2, "0")}`;
   };
 
   return (
     <div className="flex flex-col items-center gap-4">
       <div className="relative w-48 h-48 sm:w-56 sm:h-56">
         <svg className="w-full h-full -rotate-90" viewBox="0 0 200 200">
-          <circle
-            cx="100"
-            cy="100"
-            r="90"
-            fill="none"
-            stroke="#e5e7eb"
-            strokeWidth="8"
-          />
+          <circle cx="100" cy="100" r="90" fill="none" stroke="#e5e7eb" strokeWidth="8" />
           <circle
             cx="100"
             cy="100"
@@ -88,9 +81,7 @@ export function Timer({ duration, onComplete }: TimerProps) {
           <span className="text-4xl sm:text-5xl font-bold text-gray-800">
             {formatTime(timeLeft)}
           </span>
-          <span className="text-sm text-gray-500 mt-1">
-            {formatTime(duration)}
-          </span>
+          <span className="text-sm text-gray-500 mt-1">{formatTime(duration)}</span>
         </div>
       </div>
 
@@ -99,7 +90,7 @@ export function Timer({ duration, onComplete }: TimerProps) {
           <button
             onClick={handleStart}
             disabled={timeLeft === 0}
-            className="flex items-center justify-center gap-2 bg-red-500 text-white px-6 py-3 rounded-lg active:bg-red-600 transition-colors min-h-[48px] text-sm sm:text-base disabled:opacity-50 disabled:cursor-not-allowed"
+            className="flex items-center justify-center gap-2 bg-red-500 text-white px-6 py-3 rounded-lg active:bg-red-600 transition-colors min-h-12 text-sm sm:text-base disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <Play size={20} />
             <span>Iniciar</span>
@@ -107,7 +98,7 @@ export function Timer({ duration, onComplete }: TimerProps) {
         ) : (
           <button
             onClick={handlePause}
-            className="flex items-center justify-center gap-2 bg-yellow-500 text-white px-6 py-3 rounded-lg active:bg-yellow-600 transition-colors min-h-[48px] text-sm sm:text-base"
+            className="flex items-center justify-center gap-2 bg-yellow-500 text-white px-6 py-3 rounded-lg active:bg-yellow-600 transition-colors min-h-12 text-sm sm:text-base"
           >
             <Pause size={20} />
             <span>Pausar</span>
@@ -115,7 +106,7 @@ export function Timer({ duration, onComplete }: TimerProps) {
         )}
         <button
           onClick={handleReset}
-          className="flex items-center justify-center gap-2 bg-gray-200 text-gray-700 px-6 py-3 rounded-lg active:bg-gray-300 transition-colors min-h-[48px] text-sm sm:text-base"
+          className="flex items-center justify-center gap-2 bg-gray-200 text-gray-700 px-6 py-3 rounded-lg active:bg-gray-300 transition-colors min-h-12 text-sm sm:text-base"
         >
           <RotateCcw size={20} />
           <span>Resetar</span>
