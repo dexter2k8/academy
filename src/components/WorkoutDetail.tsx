@@ -1,4 +1,4 @@
-import { ArrowLeft, Check, Dumbbell, Pencil, Timer } from 'lucide-react';
+import { ArrowLeft, Check, Dumbbell, Pencil, Timer, Zap } from 'lucide-react';
 import type { Workout } from '../types/workout';
 
 interface WorkoutDetailProps {
@@ -12,6 +12,9 @@ export function WorkoutDetail({ workout, onBack, onSelectExercise, onEditWorkout
   const completedCount = workout.exercises.filter((e) => {
     if (e.type === 'timed') {
       return e.timedSeries?.every((s) => s.completed) ?? false;
+    }
+    if (e.type === 'hiit') {
+      return e.hiitSeries?.every((s) => s.completed) ?? false;
     }
     return e.series.every((s) => s.completed);
   }).length;
@@ -38,14 +41,21 @@ export function WorkoutDetail({ workout, onBack, onSelectExercise, onEditWorkout
         <div className="bg-white rounded-lg shadow overflow-hidden">
           {workout.exercises.map((exercise) => {
             const isTimed = exercise.type === 'timed';
+            const isHiit = exercise.type === 'hiit';
             const isCompleted = isTimed
               ? exercise.timedSeries?.every((s) => s.completed) ?? false
+              : isHiit
+              ? exercise.hiitSeries?.every((s) => s.completed) ?? false
               : exercise.series.every((s) => s.completed);
             const completedSeries = isTimed
               ? exercise.timedSeries?.filter((s) => s.completed).length || 0
+              : isHiit
+              ? exercise.hiitSeries?.filter((s) => s.completed).length || 0
               : exercise.series.filter((s) => s.completed).length;
             const totalSeries = isTimed
               ? exercise.timedSeries?.length || 0
+              : isHiit
+              ? exercise.hiitSeries?.length || 0
               : exercise.series.length;
 
             return (
@@ -68,6 +78,11 @@ export function WorkoutDetail({ workout, onBack, onSelectExercise, onEditWorkout
                       <>
                         <Timer size={12} className="inline mr-1" />
                         {exercise.series.length} x {exercise.duration || 30}s
+                      </>
+                    ) : isHiit ? (
+                      <>
+                        <Zap size={12} className="inline mr-1" />
+                        {exercise.recommendedSets} rodadas | {exercise.prepTime || 10}s / {exercise.workTime || 30}s / {exercise.restTime || 15}s
                       </>
                     ) : (
                       <>

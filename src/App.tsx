@@ -146,6 +146,29 @@ const initialWorkouts: Workout[] = [
           { id: 's27', completed: false },
         ],
       },
+      {
+        id: 'e10',
+        name: 'Burpees HIIT',
+        type: 'hiit',
+        recommendedSets: 8,
+        recommendedRepsMin: 0,
+        recommendedRepsMax: 0,
+        recommendedWeight: 0,
+        prepTime: 10,
+        workTime: 30,
+        restTime: 15,
+        series: [],
+        hiitSeries: [
+          { id: 's28', completed: false },
+          { id: 's29', completed: false },
+          { id: 's30', completed: false },
+          { id: 's31', completed: false },
+          { id: 's32', completed: false },
+          { id: 's33', completed: false },
+          { id: 's34', completed: false },
+          { id: 's35', completed: false },
+        ],
+      },
     ],
   },
 ];
@@ -208,6 +231,7 @@ function App() {
             exercises: w.exercises.map((e) => ({
               ...e,
               timedSeries: e.timedSeries?.map((s) => (s.id === seriesId ? { ...s, completed } : s)),
+              hiitSeries: e.hiitSeries?.map((s) => (s.id === seriesId ? { ...s, completed } : s)),
             })),
           };
         })
@@ -233,6 +257,7 @@ function App() {
               ...e,
               series: e.series.map((s) => ({ ...s, completed: true })),
               timedSeries: e.timedSeries?.map((s) => ({ ...s, completed: true })),
+              hiitSeries: e.hiitSeries?.map((s) => ({ ...s, completed: true })),
             };
           }),
         };
@@ -257,6 +282,7 @@ function App() {
             ...e,
             series: e.series.map((s) => ({ ...s, completed: false })),
             timedSeries: e.timedSeries?.map((s) => ({ ...s, completed: false })),
+            hiitSeries: e.hiitSeries?.map((s) => ({ ...s, completed: false })),
           })),
         };
       })

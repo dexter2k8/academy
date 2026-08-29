@@ -1,8 +1,9 @@
 import { useState, useEffect, useCallback } from 'react';
-import { ArrowLeft, ArrowRight, ArrowUp, Dumbbell, Check, Timer as TimerIcon } from 'lucide-react';
+import { ArrowLeft, ArrowRight, ArrowUp, Dumbbell, Check, Timer as TimerIcon, Zap } from 'lucide-react';
 import type { Exercise } from '../types/workout';
 import { getImage, isIdbImageKey } from '../hooks/useWorkoutDB';
 import { Timer } from './Timer';
+import { HiitTimer } from './HiitTimer';
 
 interface ExerciseDetailProps {
   exercise: Exercise;
@@ -35,6 +36,12 @@ export function ExerciseDetail({
     if (exercise.type !== 'timed' || !exercise.timedSeries) return 0;
     const firstUnchecked = exercise.timedSeries.findIndex((s) => !s.completed);
     return firstUnchecked === -1 ? exercise.timedSeries.length - 1 : firstUnchecked;
+  });
+
+  const [currentHiitSeriesIndex, setCurrentHiitSeriesIndex] = useState(() => {
+    if (exercise.type !== 'hiit' || !exercise.hiitSeries) return 0;
+    const firstUnchecked = exercise.hiitSeries.findIndex((s) => !s.completed);
+    return firstUnchecked === -1 ? exercise.hiitSeries.length - 1 : firstUnchecked;
   });
 
   useEffect(() => {
@@ -74,12 +81,36 @@ export function ExerciseDetail({
     }
   }, [exercise.timedSeries, currentTimedSeriesIndex, onUpdateTimedSeries]);
 
+  const handleHiitRoundComplete = useCallback(() => {
+    if (!exercise.hiitSeries || !onUpdateTimedSeries) return;
+    const currentSeries = exercise.hiitSeries[currentHiitSeriesIndex];
+    if (currentSeries) {
+      onUpdateTimedSeries(currentSeries.id, true);
+      if (currentHiitSeriesIndex < exercise.hiitSeries.length - 1) {
+        setCurrentHiitSeriesIndex((prev) => prev + 1);
+      }
+    }
+  }, [exercise.hiitSeries, currentHiitSeriesIndex, onUpdateTimedSeries]);
+
+  const handleHiitReset = useCallback(() => {
+    if (!exercise.hiitSeries || !onUpdateTimedSeries) return;
+    exercise.hiitSeries.forEach((s) => {
+      if (s.completed) onUpdateTimedSeries(s.id, false);
+    });
+    setCurrentHiitSeriesIndex(0);
+  }, [exercise.hiitSeries, onUpdateTimedSeries]);
+
   const isTimedExercise = exercise.type === 'timed';
+  const isHiitExercise = exercise.type === 'hiit';
   const completedSeries = isTimedExercise
     ? exercise.timedSeries?.filter((s) => s.completed).length || 0
+    : isHiitExercise
+    ? exercise.hiitSeries?.filter((s) => s.completed).length || 0
     : exercise.series.filter((s) => s.completed).length;
   const totalSeries = isTimedExercise
     ? exercise.timedSeries?.length || 0
+    : isHiitExercise
+    ? exercise.hiitSeries?.length || 0
     : exercise.series.length;
 
   return (
@@ -114,7 +145,7 @@ export function ExerciseDetail({
             <>
               <p className="text-center text-gray-600 text-sm sm:text-base mb-4 sm:mb-6">
                 <TimerIcon size={16} className="inline mr-1" />
-                {exercise.series.length} x {exercise.duration || 30}s
+                {exercise.recommendedSets} x {exercise.duration || 30}s
               </p>
 
               <div className="mb-4">
@@ -152,6 +183,28 @@ export function ExerciseDetail({
                     </div>
                   </div>
                 ))}
+              </div>
+            </>
+          ) : isHiitExercise ? (
+            <>
+              <p className="text-center text-gray-600 text-sm sm:text-base mb-4 sm:mb-6">
+                <Zap size={16} className="inline mr-1" />
+                {exercise.recommendedSets} rodadas | Prep: {exercise.prepTime || 10}s | Trab: {exercise.workTime || 30}s | Desc: {exercise.restTime || 15}s
+              </p>
+
+              <div className="mb-4">
+                <p className="text-center text-sm text-gray-500 mb-2">
+                  Rodada {currentHiitSeriesIndex + 1} de {exercise.hiitSeries?.length || 0}
+                </p>
+                <HiitTimer
+                  key={`${exercise.id}-${currentHiitSeriesIndex}`}
+                  prepTime={exercise.prepTime || 10}
+                  workTime={exercise.workTime || 30}
+                  restTime={exercise.restTime || 15}
+                  autoStart={currentHiitSeriesIndex > 0}
+                  onRoundComplete={handleHiitRoundComplete}
+                  onReset={handleHiitReset}
+                />
               </div>
             </>
           ) : (

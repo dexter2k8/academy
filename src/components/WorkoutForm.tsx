@@ -1,5 +1,5 @@
 import { useState, useRef } from 'react';
-import { ArrowLeft, Plus, Trash2, Upload, X, Timer, Dumbbell } from 'lucide-react';
+import { ArrowLeft, Plus, Trash2, Upload, X, Timer, Dumbbell, Zap } from 'lucide-react';
 import type { Workout, Exercise } from '../types/workout';
 import { saveImage, deleteImage, isIdbImageKey } from '../hooks/useWorkoutDB';
 
@@ -97,6 +97,14 @@ export function WorkoutForm({ workout, onSave, onCancel }: WorkoutFormProps) {
               completed: false,
             }));
             updated.series = [];
+            updated.hiitSeries = [];
+          } else if (value === 'hiit') {
+            updated.hiitSeries = Array.from({ length: e.recommendedSets }, () => ({
+              id: generateId(),
+              completed: false,
+            }));
+            updated.series = [];
+            updated.timedSeries = [];
           } else {
             updated.series = [
               ...e.series,
@@ -108,6 +116,7 @@ export function WorkoutForm({ workout, onSave, onCancel }: WorkoutFormProps) {
               })),
             ].slice(0, e.recommendedSets);
             updated.timedSeries = [];
+            updated.hiitSeries = [];
           }
         }
         
@@ -115,6 +124,10 @@ export function WorkoutForm({ workout, onSave, onCancel }: WorkoutFormProps) {
           if (e.type === 'timed') {
             updated.timedSeries = Array.from({ length: value }, (_, i) => 
               e.timedSeries?.[i] || { id: generateId(), completed: false }
+            );
+          } else if (e.type === 'hiit') {
+            updated.hiitSeries = Array.from({ length: value }, (_, i) => 
+              e.hiitSeries?.[i] || { id: generateId(), completed: false }
             );
           } else {
             const diff = value - e.series.length;
@@ -223,6 +236,18 @@ export function WorkoutForm({ workout, onSave, onCancel }: WorkoutFormProps) {
                       <Timer size={18} />
                       <span>Temporizado</span>
                     </button>
+                    <button
+                      type="button"
+                      onClick={() => updateExercise(exercise.id, 'type', 'hiit')}
+                      className={`flex-1 flex items-center justify-center gap-2 border rounded px-3 py-2.5 text-sm sm:text-base min-h-[44px] transition-colors ${
+                        exercise.type === 'hiit'
+                          ? 'border-red-500 bg-red-50 text-red-600'
+                          : 'border-gray-300 text-gray-600 active:bg-gray-50'
+                      }`}
+                    >
+                      <Zap size={18} />
+                      <span>HIIT</span>
+                    </button>
                   </div>
                 </div>
 
@@ -274,7 +299,9 @@ export function WorkoutForm({ workout, onSave, onCancel }: WorkoutFormProps) {
 
                 <div className="grid grid-cols-2 gap-2 sm:gap-3">
                   <div>
-                    <label className="block text-xs sm:text-sm text-gray-600 mb-1">Séries</label>
+                    <label className="block text-xs sm:text-sm text-gray-600 mb-1">
+                      {exercise.type === 'hiit' ? 'Rodadas' : 'Séries'}
+                    </label>
                     <input
                       type="number"
                       value={exercise.recommendedSets}
@@ -283,7 +310,7 @@ export function WorkoutForm({ workout, onSave, onCancel }: WorkoutFormProps) {
                       className="w-full border border-gray-300 rounded px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-red-500 text-sm sm:text-base min-h-[44px]"
                     />
                   </div>
-                  {exercise.type === 'repetition' ? (
+                  {exercise.type === 'repetition' && (
                     <div>
                       <label className="block text-xs sm:text-sm text-gray-600 mb-1">Carga (Kg)</label>
                       <input
@@ -295,7 +322,8 @@ export function WorkoutForm({ workout, onSave, onCancel }: WorkoutFormProps) {
                         className="w-full border border-gray-300 rounded px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-red-500 text-sm sm:text-base min-h-[44px]"
                       />
                     </div>
-                  ) : (
+                  )}
+                  {exercise.type === 'timed' && (
                     <div>
                       <label className="block text-xs sm:text-sm text-gray-600 mb-1">Duração (seg)</label>
                       <input
@@ -308,6 +336,41 @@ export function WorkoutForm({ workout, onSave, onCancel }: WorkoutFormProps) {
                     </div>
                   )}
                 </div>
+
+                {exercise.type === 'hiit' && (
+                  <div className="grid grid-cols-3 gap-2 sm:gap-3">
+                    <div>
+                      <label className="block text-xs sm:text-sm text-gray-600 mb-1">Prep (seg)</label>
+                      <input
+                        type="number"
+                        value={exercise.prepTime || 10}
+                        onChange={(e) => updateExercise(exercise.id, 'prepTime', parseInt(e.target.value) || 10)}
+                        min="1"
+                        className="w-full border border-gray-300 rounded px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-red-500 text-sm sm:text-base min-h-[44px]"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs sm:text-sm text-gray-600 mb-1">Trabalho (seg)</label>
+                      <input
+                        type="number"
+                        value={exercise.workTime || 30}
+                        onChange={(e) => updateExercise(exercise.id, 'workTime', parseInt(e.target.value) || 30)}
+                        min="1"
+                        className="w-full border border-gray-300 rounded px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-red-500 text-sm sm:text-base min-h-[44px]"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs sm:text-sm text-gray-600 mb-1">Desc (seg)</label>
+                      <input
+                        type="number"
+                        value={exercise.restTime || 15}
+                        onChange={(e) => updateExercise(exercise.id, 'restTime', parseInt(e.target.value) || 15)}
+                        min="1"
+                        className="w-full border border-gray-300 rounded px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-red-500 text-sm sm:text-base min-h-[44px]"
+                      />
+                    </div>
+                  </div>
+                )}
 
                 {exercise.type === 'repetition' && (
                   <div className="grid grid-cols-2 gap-2 sm:gap-3">
