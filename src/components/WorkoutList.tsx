@@ -1,5 +1,5 @@
-import { ChevronRight, Pencil, Trash2, Download, Upload, Eraser } from 'lucide-react';
-import { useRef } from 'react';
+import { ChevronRight, Pencil, Trash2, Download, Upload, Eraser, MoreVertical } from 'lucide-react';
+import { useRef, useState } from 'react';
 import type { Workout } from '../types/workout';
 
 interface WorkoutListProps {
@@ -15,6 +15,7 @@ interface WorkoutListProps {
 
 export function WorkoutList({ workouts, onSelectWorkout, onAddWorkout, onEditWorkout, onDeleteWorkout, onExport, onImport, onClearAll }: WorkoutListProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [menuOpen, setMenuOpen] = useState(false);
   const lastAccessedId = workouts
     .filter((w) => w.lastAccessed)
     .sort((a, b) => (b.lastAccessed ?? 0) - (a.lastAccessed ?? 0))[0]?.id ?? null;
@@ -39,8 +40,56 @@ export function WorkoutList({ workouts, onSelectWorkout, onAddWorkout, onEditWor
 
   return (
     <div className="flex flex-col min-h-dvh bg-gray-100 safe-area-inset">
-      <header className="bg-red-500 text-white px-4 py-3 flex items-center gap-3 sticky top-0 z-10 shadow-md">
+      <header className="bg-red-500 text-white px-4 py-3 flex items-center justify-between sticky top-0 z-10 shadow-md">
         <h1 className="text-xl font-bold">Treino</h1>
+        <div className="relative">
+          <button
+            onClick={() => setMenuOpen(!menuOpen)}
+            className="p-2 hover:bg-red-600 rounded-full transition-colors cursor-pointer"
+          >
+            <MoreVertical size={20} />
+          </button>
+          {menuOpen && (
+            <>
+              <div className="fixed inset-0 z-20" onClick={() => setMenuOpen(false)} />
+              <div className="absolute right-0 top-full mt-1 bg-white rounded-lg shadow-lg border border-gray-200 py-1 z-30 min-w-[160px]">
+                <button
+                  onClick={() => { onExport(); setMenuOpen(false); }}
+                  className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-100 cursor-pointer"
+                >
+                  <Download size={16} />
+                  Exportar
+                </button>
+                <button
+                  onClick={() => { fileInputRef.current?.click(); setMenuOpen(false); }}
+                  className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-100 cursor-pointer"
+                >
+                  <Upload size={16} />
+                  Importar
+                </button>
+                <div className="border-t border-gray-200 my-1" />
+                <button
+                  onClick={() => { handleDeleteAll(); setMenuOpen(false); }}
+                  className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 cursor-pointer"
+                >
+                  <Eraser size={16} />
+                  Limpar tudo
+                </button>
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept=".json"
+                  className="hidden"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    if (file) onImport(file);
+                    e.target.value = '';
+                  }}
+                />
+              </div>
+            </>
+          )}
+        </div>
       </header>
 
       <main className="flex-1 p-3 sm:p-4 pb-20">
@@ -95,47 +144,10 @@ export function WorkoutList({ workouts, onSelectWorkout, onAddWorkout, onEditWor
             <span className="text-sm sm:text-base">Adicionar Treino</span>
           </button>
         </div>
+
       </main>
 
-      <footer className="bg-white border-t border-gray-200 px-4 py-3 flex gap-2 justify-center items-center sticky bottom-0 z-10 safe-area-bottom">
-        <button
-          onClick={onExport}
-          className="flex items-center gap-1 px-3 py-2 text-xs text-gray-500 active:bg-gray-100 rounded transition-colors min-h-10 cursor-pointer"
-          title="Exportar treinos"
-        >
-          <Download size={14} />
-          <span>Exportar</span>
-        </button>
-        <span className="text-gray-300">|</span>
-        <button
-          onClick={() => fileInputRef.current?.click()}
-          className="flex items-center gap-1 px-3 py-2 text-xs text-gray-500 active:bg-gray-100 rounded transition-colors min-h-10 cursor-pointer"
-          title="Importar treinos"
-        >
-          <Upload size={14} />
-          <span>Importar</span>
-        </button>
-        <span className="text-gray-300">|</span>
-        <button
-          onClick={handleDeleteAll}
-          className="flex items-center gap-1 px-3 py-2 text-xs text-red-400 hover:text-red-600 active:bg-red-50 rounded transition-colors min-h-10 cursor-pointer"
-          title="Limpar todos os treinos"
-        >
-          <Eraser size={14} />
-          <span>Limpar</span>
-        </button>
-        <input
-          ref={fileInputRef}
-          type="file"
-          accept=".json"
-          className="hidden"
-          onChange={(e) => {
-            const file = e.target.files?.[0];
-            if (file) onImport(file);
-            e.target.value = '';
-          }}
-        />
-        <span className="text-gray-300">|</span>
+      <footer className="bg-white border-t border-gray-200 px-4 py-3 flex justify-center items-center sticky bottom-0 z-10 safe-area-bottom">
         <p className="text-xs text-gray-400">&copy; 2026 Gerenciador de Treino</p>
       </footer>
     </div>

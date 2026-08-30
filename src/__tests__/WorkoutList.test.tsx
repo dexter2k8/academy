@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from 'vitest';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen, fireEvent, within } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import { WorkoutList } from '../components/WorkoutList';
 import type { Workout } from '../types/workout';
@@ -88,14 +88,20 @@ describe('WorkoutList', () => {
     expect(screen.queryByText('Treino A')).not.toBeInTheDocument();
   });
 
-  it('renders export and import buttons', () => {
+  it('renders export and import buttons in menu', () => {
     render(<WorkoutList {...defaultProps} />);
+    const header = screen.getByText('Treino').closest('header')!;
+    const menuButton = within(header).getByRole('button');
+    fireEvent.click(menuButton);
     expect(screen.getByText('Exportar')).toBeInTheDocument();
     expect(screen.getByText('Importar')).toBeInTheDocument();
   });
 
-  it('calls onExport when clicking export button', () => {
+  it('calls onExport when clicking export button in menu', () => {
     render(<WorkoutList {...defaultProps} />);
+    const header = screen.getByText('Treino').closest('header')!;
+    const menuButton = within(header).getByRole('button');
+    fireEvent.click(menuButton);
     fireEvent.click(screen.getByText('Exportar'));
     expect(defaultProps.onExport).toHaveBeenCalled();
   });
