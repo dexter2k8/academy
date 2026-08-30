@@ -99,6 +99,93 @@ export function isIdbImageKey(image?: string): boolean {
   return !!image && !image.startsWith('http://') && !image.startsWith('https://') && !image.startsWith('data:');
 }
 
+async function getAllImages(): Promise<Record<string, string>> {
+  const db = await openDB();
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction(IMAGE_STORE, 'readonly');
+    const store = tx.objectStore(IMAGE_STORE);
+    const request = store.getAll();
+    const keyRequest = store.getAllKeys();
+    request.onsuccess = () => {
+      keyRequest.onsuccess = () => {
+        const blobs = request.result;
+        const keys = keyRequest.result;
+        const images: Record<string, string> = {};
+        const promises = keys.map((key, i) => {
+          return new Promise<void>((res) => {
+            const blob = blobs[i];
+            if (blob) {
+              const reader = new FileReader();
+              reader.onloadend = () => {
+                images[key as string] = reader.result as string;
+                res();
+              };
+              reader.readAsDataURL(blob);
+            } else {
+              res();
+            }
+          });
+        });
+        Promise.all(promises).then(() => resolve(images));
+      };
+    };
+    request.onerror = () => reject(request.error);
+    keyRequest.onerror = () => reject(keyRequest.error);
+  });
+}
+
+export async function saveImages(images: Record<string, string>): Promise<void> {
+  const db = await openDB();
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction(IMAGE_STORE, 'readwrite');
+    const store = tx.objectStore(IMAGE_STORE);
+    store.clear();
+    for (const [key, dataUrl] of Object.entries(images)) {
+      const arr = dataUrl.split(',');
+      const mime = arr[0].match(/:(.*?);/)?.[1] || 'image/png';
+      const b64 = arr[1];
+      const bin = atob(b64);
+      const bytes = new Uint8Array(bin.length);
+      for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+      const blob = new Blob([bytes], { type: mime });
+      store.put(blob, key);
+    }
+    tx.oncomplete = () => resolve();
+    tx.onerror = () => reject(tx.error);
+  });
+}
+
+interface ExportData {
+  version: 1;
+  workouts: Workout[];
+  images: Record<string, string>;
+}
+
+export async function exportWorkoutsAsJson(workouts: Workout[]): Promise<void> {
+  const images = await getAllImages();
+  const exportData: ExportData = { version: 1, workouts, images };
+  const data = JSON.stringify(exportData);
+  const blob = new Blob([data], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `treinos-${new Date().toISOString().slice(0, 10)}.json`;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+export async function importWorkoutsFromJson(file: File): Promise<{ workouts: Workout[]; images: Record<string, string> }> {
+  const text = await file.text();
+  const data = JSON.parse(text);
+  if (Array.isArray(data)) {
+    return { workouts: data as Workout[], images: {} };
+  }
+  if (data && Array.isArray(data.workouts)) {
+    return { workouts: data.workouts as Workout[], images: data.images || {} };
+  }
+  throw new Error('Arquivo inválido.');
+}
+
 export function useWorkoutDB(initialWorkouts: Workout[]) {
   const [workouts, setWorkouts] = useState<Workout[]>([]);
   const [loaded, setLoaded] = useState(false);

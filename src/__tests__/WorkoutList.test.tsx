@@ -25,6 +25,9 @@ describe('WorkoutList', () => {
     onAddWorkout: vi.fn(),
     onEditWorkout: vi.fn(),
     onDeleteWorkout: vi.fn(),
+    onExport: vi.fn(),
+    onImport: vi.fn(),
+    onClearAll: vi.fn(),
   };
 
   it('renders workout names', () => {
@@ -83,5 +86,17 @@ describe('WorkoutList', () => {
     render(<WorkoutList {...defaultProps} workouts={[]} />);
     expect(screen.getByText('Adicionar Treino')).toBeInTheDocument();
     expect(screen.queryByText('Treino A')).not.toBeInTheDocument();
+  });
+
+  it('renders export and import buttons', () => {
+    render(<WorkoutList {...defaultProps} />);
+    expect(screen.getByText('Exportar')).toBeInTheDocument();
+    expect(screen.getByText('Importar')).toBeInTheDocument();
+  });
+
+  it('calls onExport when clicking export button', () => {
+    render(<WorkoutList {...defaultProps} />);
+    fireEvent.click(screen.getByText('Exportar'));
+    expect(defaultProps.onExport).toHaveBeenCalled();
   });
 });

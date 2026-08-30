@@ -1,7 +1,7 @@
 import { useState, useCallback } from 'react';
 import type { Workout, ViewType } from './types/workout';
 import { getCompletedCount, getExerciseSeries } from './types/workout';
-import { useWorkoutDB } from './hooks/useWorkoutDB';
+import { useWorkoutDB, exportWorkoutsAsJson, importWorkoutsFromJson, saveImages } from './hooks/useWorkoutDB';
 import { initialWorkouts } from './data/seedWorkouts';
 import { WorkoutList } from './components/WorkoutList';
 import { WorkoutDetail } from './components/WorkoutDetail';
@@ -178,6 +178,26 @@ function App() {
     }
   }, [view]);
 
+  const handleExport = useCallback(() => {
+    exportWorkoutsAsJson(workouts);
+  }, [workouts]);
+
+  const handleImport = useCallback(async (file: File) => {
+    try {
+      const { workouts: imported, images } = await importWorkoutsFromJson(file);
+      if (Object.keys(images).length > 0) {
+        await saveImages(images);
+      }
+      setWorkouts(imported);
+    } catch (error) {
+      alert(`Erro ao importar: ${error instanceof Error ? error.message : 'arquivo inválido'}`);
+    }
+  }, [setWorkouts]);
+
+  const handleClearAll = useCallback(() => {
+    setWorkouts([]);
+  }, [setWorkouts]);
+
   if (!loaded) {
     return (
       <div className="flex items-center justify-center min-h-dvh bg-gray-100">
@@ -251,6 +271,9 @@ function App() {
       }}
       onEditWorkout={handleEditWorkout}
       onDeleteWorkout={handleDeleteWorkout}
+      onExport={handleExport}
+      onImport={handleImport}
+      onClearAll={handleClearAll}
     />
   );
 }
