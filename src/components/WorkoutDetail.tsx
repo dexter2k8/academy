@@ -6,6 +6,7 @@ interface WorkoutDetailProps {
   workout: Workout;
   onBack: () => void;
   onSelectExercise: (exerciseId: string) => void;
+  onToggleExercise: (exerciseId: string) => void;
   onEditWorkout: () => void;
 }
 
@@ -13,6 +14,7 @@ export function WorkoutDetail({
   workout,
   onBack,
   onSelectExercise,
+  onToggleExercise,
   onEditWorkout,
 }: WorkoutDetailProps) {
   const completedCount = workout.exercises.filter(isExerciseCompleted).length;
@@ -48,19 +50,25 @@ export function WorkoutDetail({
             const totalSeries = getExerciseSeries(exercise).length;
 
             return (
-              <button
+              <div
                 key={exercise.id}
-                onClick={() => onSelectExercise(exercise.id)}
-                className="w-full flex items-center gap-3 px-4 py-3 sm:py-4 border-b border-gray-100 active:bg-gray-50 transition-colors text-left min-h-15"
+                className="flex items-center gap-3 px-4 py-3 sm:py-4 border-b border-gray-100 min-h-15"
               >
-                <div
-                  className={`w-6 h-6 rounded flex items-center justify-center shrink-0 ${
-                    isCompleted ? "bg-green-500" : "bg-gray-200"
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onToggleExercise(exercise.id);
+                  }}
+                  className={`w-10 h-10 sm:w-11 sm:h-11 rounded flex items-center justify-center shrink-0 transition-colors ${
+                    isCompleted ? "bg-green-500" : "bg-gray-200 active:bg-gray-300"
                   }`}
                 >
-                  {isCompleted && <Check size={16} className="text-white" />}
-                </div>
-                <div className="flex-1 min-w-0">
+                  {isCompleted && <Check size={18} className="text-white" />}
+                </button>
+                <button
+                  onClick={() => onSelectExercise(exercise.id)}
+                  className="flex-1 min-w-0 text-left active:bg-gray-50 transition-colors rounded px-2 py-1 -mx-2 -my-1"
+                >
                   <p className="text-gray-800 font-medium text-sm sm:text-base truncate">
                     {exercise.name}
                   </p>
@@ -83,11 +91,11 @@ export function WorkoutDetail({
                       </>
                     )}
                   </p>
-                </div>
+                </button>
                 <div className="text-xs sm:text-sm text-gray-500 shrink-0">
                   {completedSeries}/{totalSeries}
                 </div>
-              </button>
+              </div>
             );
           })}
         </div>

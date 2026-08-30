@@ -35,6 +35,7 @@ describe('WorkoutDetail', () => {
     workout,
     onBack: vi.fn(),
     onSelectExercise: vi.fn(),
+    onToggleExercise: vi.fn(),
     onEditWorkout: vi.fn(),
   };
 
@@ -61,9 +62,9 @@ describe('WorkoutDetail', () => {
 
   it('shows series counter for each exercise', () => {
     render(<WorkoutDetail {...defaultProps} />);
-    const curl = screen.getByText('Curl').closest('button')!;
+    const curl = screen.getByText('Curl').closest('[class*="flex"]')!.parentElement!;
     expect(curl).toHaveTextContent('1/3');
-    const prancha = screen.getByText('Prancha').closest('button')!;
+    const prancha = screen.getByText('Prancha').closest('[class*="flex"]')!.parentElement!;
     expect(prancha).toHaveTextContent('1/3');
   });
 

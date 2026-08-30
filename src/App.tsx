@@ -36,6 +36,33 @@ function App() {
     setView('exercise');
   }, []);
 
+  const handleToggleExercise = useCallback(
+    (exerciseId: string) => {
+      if (!selectedWorkoutId) return;
+      setWorkouts((prev) =>
+        prev.map((w) => {
+          if (w.id !== selectedWorkoutId) return w;
+          return {
+            ...w,
+            exercises: w.exercises.map((e) => {
+              if (e.id !== exerciseId) return e;
+              const series = getExerciseSeries(e);
+              const allCompleted = series.length > 0 && series.every((s) => s.completed);
+              const newValue = !allCompleted;
+              return {
+                ...e,
+                series: e.series.map((s) => ({ ...s, completed: newValue })),
+                timedSeries: e.timedSeries?.map((s) => ({ ...s, completed: newValue })),
+                hiitSeries: e.hiitSeries?.map((s) => ({ ...s, completed: newValue })),
+              };
+            }),
+          };
+        })
+      );
+    },
+    [selectedWorkoutId, setWorkouts]
+  );
+
   const handleUpdateSeries = useCallback(
     (seriesId: string, field: 'reps' | 'weight' | 'completed', value: number | boolean) => {
       if (!selectedWorkoutId) return;
@@ -256,6 +283,7 @@ function App() {
         workout={selectedWorkout}
         onBack={handleBack}
         onSelectExercise={handleSelectExercise}
+        onToggleExercise={handleToggleExercise}
         onEditWorkout={() => handleEditWorkout(selectedWorkout.id)}
       />
     );
