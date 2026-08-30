@@ -1,6 +1,15 @@
-import { ChevronRight, Pencil, Trash2, Download, Upload, Eraser, MoreVertical } from 'lucide-react';
-import { useRef, useState } from 'react';
-import type { Workout } from '../types/workout';
+import {
+  ChevronRight,
+  Pencil,
+  Trash2,
+  Download,
+  Upload,
+  Eraser,
+  MoreVertical,
+  Info,
+} from "lucide-react";
+import { useRef, useState } from "react";
+import type { Workout } from "../types/workout";
 
 interface WorkoutListProps {
   workouts: Workout[];
@@ -13,12 +22,22 @@ interface WorkoutListProps {
   onClearAll: () => void;
 }
 
-export function WorkoutList({ workouts, onSelectWorkout, onAddWorkout, onEditWorkout, onDeleteWorkout, onExport, onImport, onClearAll }: WorkoutListProps) {
+export function WorkoutList({
+  workouts,
+  onSelectWorkout,
+  onAddWorkout,
+  onEditWorkout,
+  onDeleteWorkout,
+  onExport,
+  onImport,
+  onClearAll,
+}: WorkoutListProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [menuOpen, setMenuOpen] = useState(false);
-  const lastAccessedId = workouts
-    .filter((w) => w.lastAccessed)
-    .sort((a, b) => (b.lastAccessed ?? 0) - (a.lastAccessed ?? 0))[0]?.id ?? null;
+  const lastAccessedId =
+    workouts
+      .filter((w) => w.lastAccessed)
+      .sort((a, b) => (b.lastAccessed ?? 0) - (a.lastAccessed ?? 0))[0]?.id ?? null;
 
   const handleDelete = (e: React.MouseEvent, id: string, name: string) => {
     e.stopPropagation();
@@ -33,9 +52,15 @@ export function WorkoutList({ workouts, onSelectWorkout, onAddWorkout, onEditWor
   };
 
   const handleDeleteAll = () => {
-    if (window.confirm('Deseja excluir TODOS os treinos? Esta ação não pode ser desfeita.')) {
+    if (window.confirm("Deseja excluir TODOS os treinos? Esta ação não pode ser desfeita.")) {
       onClearAll();
     }
+  };
+
+  const handleAbout = () => {
+    alert(
+      "Gerenciador de Treino\n\nOrganize e acompanhe seus treinos de musculação.\n\nDesenvolvido por neimestre2k8@gmail.com",
+    );
   };
 
   return (
@@ -52,16 +77,22 @@ export function WorkoutList({ workouts, onSelectWorkout, onAddWorkout, onEditWor
           {menuOpen && (
             <>
               <div className="fixed inset-0 z-20" onClick={() => setMenuOpen(false)} />
-              <div className="absolute right-0 top-full mt-1 bg-white rounded-lg shadow-lg border border-gray-200 py-1 z-30 min-w-[160px]">
+              <div className="absolute right-0 top-full mt-1 bg-white rounded-lg shadow-lg border border-gray-200 py-1 z-30 min-w-40">
                 <button
-                  onClick={() => { onExport(); setMenuOpen(false); }}
+                  onClick={() => {
+                    onExport();
+                    setMenuOpen(false);
+                  }}
                   className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-100 cursor-pointer"
                 >
                   <Download size={16} />
                   Exportar
                 </button>
                 <button
-                  onClick={() => { fileInputRef.current?.click(); setMenuOpen(false); }}
+                  onClick={() => {
+                    fileInputRef.current?.click();
+                    setMenuOpen(false);
+                  }}
                   className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-100 cursor-pointer"
                 >
                   <Upload size={16} />
@@ -69,7 +100,20 @@ export function WorkoutList({ workouts, onSelectWorkout, onAddWorkout, onEditWor
                 </button>
                 <div className="border-t border-gray-200 my-1" />
                 <button
-                  onClick={() => { handleDeleteAll(); setMenuOpen(false); }}
+                  onClick={() => {
+                    handleAbout();
+                    setMenuOpen(false);
+                  }}
+                  className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-100 cursor-pointer"
+                >
+                  <Info size={16} />
+                  Sobre
+                </button>
+                <button
+                  onClick={() => {
+                    handleDeleteAll();
+                    setMenuOpen(false);
+                  }}
                   className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 cursor-pointer"
                 >
                   <Eraser size={16} />
@@ -83,7 +127,7 @@ export function WorkoutList({ workouts, onSelectWorkout, onAddWorkout, onEditWor
                   onChange={(e) => {
                     const file = e.target.files?.[0];
                     if (file) onImport(file);
-                    e.target.value = '';
+                    e.target.value = "";
                   }}
                 />
               </div>
@@ -94,14 +138,16 @@ export function WorkoutList({ workouts, onSelectWorkout, onAddWorkout, onEditWor
 
       <main className="flex-1 p-3 sm:p-4 pb-20">
         <p className="text-gray-600 mb-1 text-sm sm:text-base">Escolha uma rotina</p>
-        <p className="text-gray-500 text-xs sm:text-sm mb-3 sm:mb-4">Para melhor desempenho, escolha a rotina em destaque.</p>
+        <p className="text-gray-500 text-xs sm:text-sm mb-3 sm:mb-4">
+          Para melhor desempenho, escolha a rotina em destaque.
+        </p>
 
         <div className="bg-white rounded-lg shadow overflow-hidden">
           {workouts.map((workout, index) => (
             <div
               key={workout.id}
               className={`flex items-center border-b border-gray-100 min-h-14 ${
-                workout.id === lastAccessedId ? 'font-bold' : ''
+                workout.id === lastAccessedId ? "font-bold" : ""
               }`}
             >
               <button
@@ -116,7 +162,7 @@ export function WorkoutList({ workouts, onSelectWorkout, onAddWorkout, onEditWor
                 </div>
                 <ChevronRight size={20} className="text-gray-400 shrink-0" />
               </button>
-              
+
               <div className="flex items-center pr-2 gap-1">
                 <button
                   onClick={(e) => handleEdit(e, workout.id)}
@@ -144,11 +190,10 @@ export function WorkoutList({ workouts, onSelectWorkout, onAddWorkout, onEditWor
             <span className="text-sm sm:text-base">Adicionar Treino</span>
           </button>
         </div>
-
       </main>
 
       <footer className="bg-white border-t border-gray-200 px-4 py-3 flex justify-center items-center sticky bottom-0 z-10 safe-area-bottom">
-        <p className="text-xs text-gray-400">&copy; 2026 Gerenciador de Treino</p>
+        <p className="text-xs text-gray-400">&copy; 2026 Gerenciador de Treino v1.0</p>
       </footer>
     </div>
   );
