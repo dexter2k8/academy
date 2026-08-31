@@ -65,6 +65,17 @@ export function WorkoutList({
 
   return (
     <div className="flex flex-col min-h-dvh bg-gray-100 safe-area-inset">
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept=".json"
+        className="hidden"
+        onChange={(e) => {
+          const file = e.target.files?.[0];
+          if (file) onImport(file);
+          e.target.value = "";
+        }}
+      />
       <header className="bg-red-500 text-white px-4 py-3 flex items-center justify-between sticky top-0 z-10 shadow-md">
         <h1 className="text-xl font-bold">Treino</h1>
         <div className="relative">
@@ -119,17 +130,6 @@ export function WorkoutList({
                   <Eraser size={16} />
                   Limpar tudo
                 </button>
-                <input
-                  ref={fileInputRef}
-                  type="file"
-                  accept=".json"
-                  className="hidden"
-                  onChange={(e) => {
-                    const file = e.target.files?.[0];
-                    if (file) onImport(file);
-                    e.target.value = "";
-                  }}
-                />
               </div>
             </>
           )}
