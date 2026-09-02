@@ -13,6 +13,7 @@ import { getCompletedCount, getExerciseSeries } from "../types/workout";
 import { getImage, isIdbImageKey } from "../hooks/useWorkoutDB";
 import { Timer } from "./Timer";
 import { HiitTimer } from "./HiitTimer";
+import { NumberInput } from "./NumberInput";
 
 interface ExerciseDetailProps {
   exercise: Exercise;
@@ -247,11 +248,10 @@ export function ExerciseDetail({
 
                     <div className="flex-1 flex items-center gap-2">
                       <label className="text-xs text-gray-500 hidden sm:inline">Reps:</label>
-                      <input
-                        type="number"
+                      <NumberInput
                         value={series.reps}
-                        onChange={(e) =>
-                          onUpdateSeries(series.id, "reps", parseInt(e.target.value) || 0)
+                        onChange={(val) =>
+                          onUpdateSeries(series.id, "reps", val)
                         }
                         className="w-16 sm:w-20 border border-gray-300 rounded px-2 py-2 text-center text-sm sm:text-base focus:outline-none focus:ring-2 focus:ring-red-500 min-h-11"
                       />
@@ -259,12 +259,12 @@ export function ExerciseDetail({
 
                     <div className="flex-1 flex items-center gap-2">
                       <label className="text-xs text-gray-500 hidden sm:inline">Carga:</label>
-                      <input
-                        type="number"
+                      <NumberInput
                         value={series.weight}
-                        onChange={(e) =>
-                          onUpdateSeries(series.id, "weight", parseFloat(e.target.value) || 0)
+                        onChange={(val) =>
+                          onUpdateSeries(series.id, "weight", val)
                         }
+                        step={0.5}
                         className="w-16 sm:w-20 border border-gray-300 rounded px-2 py-2 text-center text-sm sm:text-base focus:outline-none focus:ring-2 focus:ring-red-500 min-h-11"
                       />
                     </div>

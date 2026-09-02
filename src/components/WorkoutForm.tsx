@@ -3,6 +3,7 @@ import { ArrowLeft, Plus, Trash2, Upload, X, Timer, Dumbbell, Zap } from "lucide
 import type { Workout, Exercise } from "../types/workout";
 import { generateId, createDefaultExercise } from "../types/workout";
 import { saveImage, deleteImage, isIdbImageKey } from "../hooks/useWorkoutDB";
+import { NumberInput } from "./NumberInput";
 
 interface WorkoutFormProps {
   workout?: Workout;
@@ -276,17 +277,16 @@ export function WorkoutForm({ workout, onSave, onCancel }: WorkoutFormProps) {
                     <label className="block text-xs sm:text-sm text-gray-600 mb-1">
                       {exercise.type === "hiit" ? "Rodadas" : "Séries"}
                     </label>
-                    <input
-                      type="number"
+                    <NumberInput
                       value={exercise.recommendedSets}
-                      onChange={(e) =>
+                      onChange={(val) =>
                         updateExercise(
                           exercise.id,
                           "recommendedSets",
-                          parseInt(e.target.value) || 1,
+                          val,
                         )
                       }
-                      min="1"
+                      min={1}
                       className="w-full border border-gray-300 rounded px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-red-500 text-sm sm:text-base min-h-11"
                     />
                   </div>
@@ -295,18 +295,17 @@ export function WorkoutForm({ workout, onSave, onCancel }: WorkoutFormProps) {
                       <label className="block text-xs sm:text-sm text-gray-600 mb-1">
                         Carga (Kg)
                       </label>
-                      <input
-                        type="number"
+                      <NumberInput
                         value={exercise.recommendedWeight}
-                        onChange={(e) =>
+                        onChange={(val) =>
                           updateExercise(
                             exercise.id,
                             "recommendedWeight",
-                            parseFloat(e.target.value) || 0,
+                            val,
                           )
                         }
-                        min="0"
-                        step="0.5"
+                        min={0}
+                        step={0.5}
                         className="w-full border border-gray-300 rounded px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-red-500 text-sm sm:text-base min-h-11"
                       />
                     </div>
@@ -316,13 +315,12 @@ export function WorkoutForm({ workout, onSave, onCancel }: WorkoutFormProps) {
                       <label className="block text-xs sm:text-sm text-gray-600 mb-1">
                         Duração (seg)
                       </label>
-                      <input
-                        type="number"
+                      <NumberInput
                         value={exercise.duration || 30}
-                        onChange={(e) =>
-                          updateExercise(exercise.id, "duration", parseInt(e.target.value) || 30)
+                        onChange={(val) =>
+                          updateExercise(exercise.id, "duration", val)
                         }
-                        min="1"
+                        min={1}
                         className="w-full border border-gray-300 rounded px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-red-500 text-sm sm:text-base min-h-11"
                       />
                     </div>
@@ -335,13 +333,12 @@ export function WorkoutForm({ workout, onSave, onCancel }: WorkoutFormProps) {
                       <label className="block text-xs sm:text-sm text-gray-600 mb-1">
                         Prep (seg)
                       </label>
-                      <input
-                        type="number"
+                      <NumberInput
                         value={exercise.prepTime || 10}
-                        onChange={(e) =>
-                          updateExercise(exercise.id, "prepTime", parseInt(e.target.value) || 10)
+                        onChange={(val) =>
+                          updateExercise(exercise.id, "prepTime", val)
                         }
-                        min="1"
+                        min={1}
                         className="w-full border border-gray-300 rounded px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-red-500 text-sm sm:text-base min-h-11"
                       />
                     </div>
@@ -349,13 +346,12 @@ export function WorkoutForm({ workout, onSave, onCancel }: WorkoutFormProps) {
                       <label className="block text-xs sm:text-sm text-gray-600 mb-1">
                         Trabalho (seg)
                       </label>
-                      <input
-                        type="number"
+                      <NumberInput
                         value={exercise.workTime || 30}
-                        onChange={(e) =>
-                          updateExercise(exercise.id, "workTime", parseInt(e.target.value) || 30)
+                        onChange={(val) =>
+                          updateExercise(exercise.id, "workTime", val)
                         }
-                        min="1"
+                        min={1}
                         className="w-full border border-gray-300 rounded px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-red-500 text-sm sm:text-base min-h-11"
                       />
                     </div>
@@ -363,13 +359,12 @@ export function WorkoutForm({ workout, onSave, onCancel }: WorkoutFormProps) {
                       <label className="block text-xs sm:text-sm text-gray-600 mb-1">
                         Desc (seg)
                       </label>
-                      <input
-                        type="number"
+                      <NumberInput
                         value={exercise.restTime || 15}
-                        onChange={(e) =>
-                          updateExercise(exercise.id, "restTime", parseInt(e.target.value) || 15)
+                        onChange={(val) =>
+                          updateExercise(exercise.id, "restTime", val)
                         }
-                        min="1"
+                        min={1}
                         className="w-full border border-gray-300 rounded px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-red-500 text-sm sm:text-base min-h-11"
                       />
                     </div>
@@ -382,17 +377,16 @@ export function WorkoutForm({ workout, onSave, onCancel }: WorkoutFormProps) {
                       <label className="block text-xs sm:text-sm text-gray-600 mb-1">
                         Reps Mín
                       </label>
-                      <input
-                        type="number"
+                      <NumberInput
                         value={exercise.recommendedRepsMin}
-                        onChange={(e) =>
+                        onChange={(val) =>
                           updateExercise(
                             exercise.id,
                             "recommendedRepsMin",
-                            parseInt(e.target.value) || 1,
+                            val,
                           )
                         }
-                        min="1"
+                        min={1}
                         className="w-full border border-gray-300 rounded px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-red-500 text-sm sm:text-base min-h-11"
                       />
                     </div>
@@ -400,17 +394,16 @@ export function WorkoutForm({ workout, onSave, onCancel }: WorkoutFormProps) {
                       <label className="block text-xs sm:text-sm text-gray-600 mb-1">
                         Reps Máx
                       </label>
-                      <input
-                        type="number"
+                      <NumberInput
                         value={exercise.recommendedRepsMax}
-                        onChange={(e) =>
+                        onChange={(val) =>
                           updateExercise(
                             exercise.id,
                             "recommendedRepsMax",
-                            parseInt(e.target.value) || 1,
+                            val,
                           )
                         }
-                        min="1"
+                        min={1}
                         className="w-full border border-gray-300 rounded px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-red-500 text-sm sm:text-base min-h-11"
                       />
                     </div>

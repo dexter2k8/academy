@@ -91,6 +91,7 @@ describe('ExerciseDetail - Repetition', () => {
     renderExerciseDetail(repetitionExercise, { onUpdateSeries });
     const repsInputs = screen.getAllByDisplayValue('15');
     fireEvent.change(repsInputs[0], { target: { value: '20' } });
+    fireEvent.blur(repsInputs[0]);
     expect(onUpdateSeries).toHaveBeenCalledWith('s1', 'reps', 20);
   });
 
