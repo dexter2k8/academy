@@ -8,6 +8,8 @@ interface HiitTimerProps {
   prepTime: number;
   workTime: number;
   restTime: number;
+  grandTotalTime: number;
+  cumulativeElapsedBeforeRound?: number;
   autoStart?: boolean;
   onRoundComplete: () => void;
   onReset?: () => void;
@@ -17,6 +19,8 @@ export function HiitTimer({
   prepTime,
   workTime,
   restTime,
+  grandTotalTime,
+  cumulativeElapsedBeforeRound = 0,
   autoStart,
   onRoundComplete,
   onReset,
@@ -24,7 +28,7 @@ export function HiitTimer({
   const [phase, setPhase] = useState<HiitPhase>("prep");
   const [timeLeft, setTimeLeft] = useState(prepTime);
   const [isRunning, setIsRunning] = useState(false);
-  const [totalElapsed, setTotalElapsed] = useState(0);
+  const [roundElapsed, setRoundElapsed] = useState(0);
   const completedRef = useRef(false);
 
   const getPhaseDuration = (p: HiitPhase) => {
@@ -64,7 +68,7 @@ export function HiitTimer({
     completedRef.current = false;
     setPhase("prep");
     setTimeLeft(prepTime);
-    setTotalElapsed(0);
+    setRoundElapsed(0);
     setIsRunning(autoStart ?? false);
   }, [prepTime, workTime, restTime, autoStart]);
 
@@ -72,7 +76,7 @@ export function HiitTimer({
     if (!isRunning || timeLeft <= 0) return;
 
     const interval = setInterval(() => {
-      setTotalElapsed((prev) => prev + 1);
+      setRoundElapsed((prev) => prev + 1);
       setTimeLeft((prev) => {
         if (prev <= 1) {
           clearInterval(interval);
@@ -112,10 +116,11 @@ export function HiitTimer({
     completedRef.current = false;
     setPhase("prep");
     setTimeLeft(prepTime);
-    setTotalElapsed(0);
+    setRoundElapsed(0);
     onReset?.();
   }, [prepTime, onReset]);
 
+  const totalRemaining = grandTotalTime - (cumulativeElapsedBeforeRound + roundElapsed);
   const currentDuration = getPhaseDuration(phase);
   const progress = currentDuration > 0 ? ((currentDuration - timeLeft) / currentDuration) * 100 : 0;
   const circumference = 2 * Math.PI * 90;
@@ -154,7 +159,9 @@ export function HiitTimer({
         </div>
       </div>
 
-      <p className="text-sm text-gray-500">Tempo total: {formatTime(totalElapsed)}</p>
+      <p className="text-sm text-gray-500">
+        Tempo total: {formatTime(totalRemaining > 0 ? totalRemaining : 0)}
+      </p>
 
       <div className="flex gap-3">
         {!isRunning ? (

@@ -60,7 +60,9 @@ export function ExerciseDetail({
   useEffect(() => {
     if (isTimedExercise && exercise.timedSeries) {
       const firstUnchecked = exercise.timedSeries.findIndex((s) => !s.completed);
-      setCurrentTimedSeriesIndex(firstUnchecked === -1 ? exercise.timedSeries.length - 1 : firstUnchecked);
+      setCurrentTimedSeriesIndex(
+        firstUnchecked === -1 ? exercise.timedSeries.length - 1 : firstUnchecked,
+      );
     }
   }, [isTimedExercise, exercise.timedSeries]);
 
@@ -68,6 +70,17 @@ export function ExerciseDetail({
     if (exercise.type !== "hiit" || !exercise.hiitSeries) return 0;
     const firstUnchecked = exercise.hiitSeries.findIndex((s) => !s.completed);
     return firstUnchecked === -1 ? exercise.hiitSeries.length - 1 : firstUnchecked;
+  });
+  const [hiitCumulativeElapsed, setHiitCumulativeElapsed] = useState(() => {
+    if (exercise.type !== "hiit" || !exercise.hiitSeries) return 0;
+    const roundTime =
+      (exercise.prepTime || 10) + (exercise.workTime || 30) + (exercise.restTime || 15);
+    let elapsed = 0;
+    for (const s of exercise.hiitSeries) {
+      if (s.completed) elapsed += roundTime;
+      else break;
+    }
+    return elapsed;
   });
 
   useEffect(() => {
@@ -96,6 +109,29 @@ export function ExerciseDetail({
     };
   }, [exercise.id, exercise.image]);
 
+  useEffect(() => {
+    if (isHiitExercise && exercise.hiitSeries) {
+      const roundTime =
+        (exercise.prepTime || 10) + (exercise.workTime || 30) + (exercise.restTime || 15);
+      let elapsed = 0;
+      for (const s of exercise.hiitSeries) {
+        if (s.completed) elapsed += roundTime;
+        else break;
+      }
+      setHiitCumulativeElapsed(elapsed);
+      const firstUnchecked = exercise.hiitSeries.findIndex((s) => !s.completed);
+      setCurrentHiitSeriesIndex(
+        firstUnchecked === -1 ? exercise.hiitSeries.length - 1 : firstUnchecked,
+      );
+    }
+  }, [
+    isHiitExercise,
+    exercise.hiitSeries,
+    exercise.prepTime,
+    exercise.workTime,
+    exercise.restTime,
+  ]);
+
   const handleTimedSeriesComplete = useCallback(() => {
     if (!exercise.timedSeries || !onUpdateTimedSeries) return;
     const currentSeries = exercise.timedSeries[currentTimedSeriesIndex];
@@ -112,11 +148,21 @@ export function ExerciseDetail({
     const currentSeries = exercise.hiitSeries[currentHiitSeriesIndex];
     if (currentSeries) {
       onUpdateTimedSeries(currentSeries.id, true);
+      const roundTime =
+        (exercise.prepTime || 10) + (exercise.workTime || 30) + (exercise.restTime || 15);
+      setHiitCumulativeElapsed((prev) => prev + roundTime);
       if (currentHiitSeriesIndex < exercise.hiitSeries.length - 1) {
         setCurrentHiitSeriesIndex((prev) => prev + 1);
       }
     }
-  }, [exercise.hiitSeries, currentHiitSeriesIndex, onUpdateTimedSeries]);
+  }, [
+    exercise.hiitSeries,
+    currentHiitSeriesIndex,
+    exercise.prepTime,
+    exercise.workTime,
+    exercise.restTime,
+    onUpdateTimedSeries,
+  ]);
 
   const handleHiitReset = useCallback(() => {
     if (!exercise.hiitSeries || !onUpdateTimedSeries) return;
@@ -124,6 +170,7 @@ export function ExerciseDetail({
       if (s.completed) onUpdateTimedSeries(s.id, false);
     });
     setCurrentHiitSeriesIndex(0);
+    setHiitCumulativeElapsed(0);
   }, [exercise.hiitSeries, onUpdateTimedSeries]);
 
   const completedSeries = getCompletedCount(exercise);
@@ -139,7 +186,7 @@ export function ExerciseDetail({
           <ArrowLeft size={24} />
         </button>
         <h1 className="text-lg sm:text-xl font-bold truncate">
-          Exercicio {exerciseIndex + 1} de {totalExercises}
+          Exercício {exerciseIndex + 1} de {totalExercises}
         </h1>
       </header>
 
@@ -223,6 +270,13 @@ export function ExerciseDetail({
                   prepTime={exercise.prepTime || 10}
                   workTime={exercise.workTime || 30}
                   restTime={exercise.restTime || 15}
+                  grandTotalTime={
+                    ((exercise.prepTime || 10) +
+                      (exercise.workTime || 30) +
+                      (exercise.restTime || 15)) *
+                    (exercise.hiitSeries?.length || 1)
+                  }
+                  cumulativeElapsedBeforeRound={hiitCumulativeElapsed}
                   autoStart={currentHiitSeriesIndex > 0}
                   onRoundComplete={handleHiitRoundComplete}
                   onReset={handleHiitReset}
@@ -250,9 +304,7 @@ export function ExerciseDetail({
                       <label className="text-xs text-gray-500 hidden sm:inline">Reps:</label>
                       <NumberInput
                         value={series.reps}
-                        onChange={(val) =>
-                          onUpdateSeries(series.id, "reps", val)
-                        }
+                        onChange={(val) => onUpdateSeries(series.id, "reps", val)}
                         className="w-16 sm:w-20 border border-gray-300 rounded px-2 py-2 text-center text-sm sm:text-base focus:outline-none focus:ring-2 focus:ring-red-500 min-h-11"
                       />
                     </div>
@@ -261,9 +313,7 @@ export function ExerciseDetail({
                       <label className="text-xs text-gray-500 hidden sm:inline">Carga:</label>
                       <NumberInput
                         value={series.weight}
-                        onChange={(val) =>
-                          onUpdateSeries(series.id, "weight", val)
-                        }
+                        onChange={(val) => onUpdateSeries(series.id, "weight", val)}
                         step={0.5}
                         className="w-16 sm:w-20 border border-gray-300 rounded px-2 py-2 text-center text-sm sm:text-base focus:outline-none focus:ring-2 focus:ring-red-500 min-h-11"
                       />
