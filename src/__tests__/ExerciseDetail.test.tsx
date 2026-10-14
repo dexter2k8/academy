@@ -72,7 +72,7 @@ describe('ExerciseDetail - Repetition', () => {
 
   it('renders exercise index in header', () => {
     renderExerciseDetail(repetitionExercise, { exerciseIndex: 1, totalExercises: 3 });
-    expect(screen.getByText('Exercicio 2 de 3')).toBeInTheDocument();
+    expect(screen.getByText('Exercício 2 de 3')).toBeInTheDocument();
   });
 
   it('renders recommended info', () => {
@@ -220,7 +220,7 @@ describe('ExerciseDetail - Back button', () => {
   it('calls onBack when clicking back', () => {
     const onBack = vi.fn();
     renderExerciseDetail(repetitionExercise, { onBack });
-    const header = screen.getByText(/Exercicio/).closest('header')!;
+    const header = screen.getByText(/Exercício/).closest('header')!;
     const backBtn = header.querySelector('button')!;
     fireEvent.click(backBtn);
     expect(onBack).toHaveBeenCalled();

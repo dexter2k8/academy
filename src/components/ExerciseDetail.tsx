@@ -190,167 +190,179 @@ export function ExerciseDetail({
         </h1>
       </header>
 
-      <main className="flex-1 p-3 sm:p-4 pb-20 overflow-y-auto">
+      <main className="flex-1 p-3 sm:p-4 pb-20 landscape:pb-14 overflow-y-auto">
         <div className="bg-white rounded-lg shadow p-4 sm:p-6">
-          <h2 className="text-lg sm:text-xl font-bold text-gray-800 text-center mb-3 sm:mb-4">
-            {exercise.name}
-          </h2>
+          <div className="landscape:flex landscape:gap-6 landscape:items-start">
+            <div className="landscape:w-44 landscape:shrink-0">
+              <h2 className="text-lg sm:text-xl font-bold text-gray-800 text-center mb-3 sm:mb-4">
+                {exercise.name}
+              </h2>
 
-          <div className="w-32 h-32 sm:w-48 sm:h-48 mx-auto bg-gray-100 rounded-full flex items-center justify-center mb-4 overflow-hidden">
-            {imageUrl ? (
-              <img src={imageUrl} alt={exercise.name} className="w-full h-full object-cover" />
-            ) : (
-              <>
-                <Dumbbell size={48} className="text-red-500 sm:hidden" />
-                <Dumbbell size={64} className="text-red-500 hidden sm:block" />
-              </>
-            )}
-          </div>
-
-          {isTimedExercise ? (
-            <>
-              <p className="text-center text-gray-600 text-sm sm:text-base mb-4 sm:mb-6">
-                <TimerIcon size={16} className="inline mr-1" />
-                {exercise.recommendedSets} x {exercise.duration || 30}s
-              </p>
-
-              <div className="mb-4">
-                <p className="text-center text-sm text-gray-500 mb-2">
-                  Série {currentTimedSeriesIndex + 1} de {exercise.timedSeries?.length || 0}
-                </p>
-                <Timer
-                  key={`${exercise.id}-${currentTimedSeriesIndex}`}
-                  duration={exercise.duration || 30}
-                  onComplete={handleTimedSeriesComplete}
-                />
+              <div className="w-[min(8rem,30dvh)] h-[min(8rem,30dvh)] sm:w-[min(12rem,32dvh)] sm:h-[min(12rem,32dvh)] mx-auto bg-gray-100 rounded-full flex items-center justify-center mb-4 overflow-hidden">
+                {imageUrl ? (
+                  <img
+                    src={imageUrl}
+                    alt={exercise.name}
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <>
+                    <Dumbbell size={48} className="text-red-500 sm:hidden" />
+                    <Dumbbell size={64} className="text-red-500 hidden sm:block" />
+                  </>
+                )}
               </div>
+            </div>
 
-              <div className="space-y-2">
-                {exercise.timedSeries?.map((series, index) => (
-                  <div
-                    key={series.id}
-                    className={`flex items-center justify-between p-3 rounded-lg ${
-                      series.completed
-                        ? "bg-green-50"
-                        : index === currentTimedSeriesIndex
-                          ? "bg-red-50"
-                          : "bg-gray-50"
-                    }`}
-                  >
-                    <span className="font-medium text-gray-700 text-sm">{index + 1}ª Série</span>
-                    <div className="flex items-center gap-2">
-                      <span className="text-sm text-gray-500">{exercise.duration || 30}s</span>
-                      <button
-                        onClick={() => onUpdateTimedSeries?.(series.id, !series.completed)}
-                        className={`w-10 h-10 sm:w-11 sm:h-11 rounded flex items-center justify-center shrink-0 transition-colors ${
-                          series.completed ? "bg-green-500" : "bg-gray-200 active:bg-gray-300"
+            <div className="landscape:flex-1 landscape:min-w-0 landscape:flex landscape:flex-col">
+              {isTimedExercise ? (
+                <>
+                  <p className="text-center text-gray-600 text-sm sm:text-base mb-4 sm:mb-6">
+                    <TimerIcon size={16} className="inline mr-1" />
+                    {exercise.recommendedSets} x {exercise.duration || 30}s
+                  </p>
+
+                  <div className="mb-4 landscape:order-first">
+                    <p className="text-center text-sm text-gray-500 mb-2">
+                      Série {currentTimedSeriesIndex + 1} de {exercise.timedSeries?.length || 0}
+                    </p>
+                    <Timer
+                      key={`${exercise.id}-${currentTimedSeriesIndex}`}
+                      duration={exercise.duration || 30}
+                      onComplete={handleTimedSeriesComplete}
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    {exercise.timedSeries?.map((series, index) => (
+                      <div
+                        key={series.id}
+                        className={`flex items-center justify-between p-3 rounded-lg ${
+                          series.completed
+                            ? "bg-green-50"
+                            : index === currentTimedSeriesIndex
+                              ? "bg-red-50"
+                              : "bg-gray-50"
                         }`}
                       >
-                        {series.completed && <Check size={18} className="text-white" />}
-                      </button>
-                    </div>
+                        <span className="font-medium text-gray-700 text-sm">
+                          {index + 1}ª Série
+                        </span>
+                        <div className="flex items-center gap-2">
+                          <span className="text-sm text-gray-500">{exercise.duration || 30}s</span>
+                          <button
+                            onClick={() => onUpdateTimedSeries?.(series.id, !series.completed)}
+                            className={`w-10 h-10 sm:w-11 sm:h-11 rounded flex items-center justify-center shrink-0 transition-colors ${
+                              series.completed ? "bg-green-500" : "bg-gray-200 active:bg-gray-300"
+                            }`}
+                          >
+                            {series.completed && <Check size={18} className="text-white" />}
+                          </button>
+                        </div>
+                      </div>
+                    ))}
                   </div>
-                ))}
-              </div>
-            </>
-          ) : isHiitExercise ? (
-            <>
-              <p className="text-center text-gray-600 text-sm sm:text-base mb-4 sm:mb-6">
-                <Zap size={16} className="inline mr-1" />
-                {exercise.recommendedSets} rodadas | Prep: {exercise.prepTime || 10}s | Trab:{" "}
-                {exercise.workTime || 30}s | Desc: {exercise.restTime || 15}s
-              </p>
+                </>
+              ) : isHiitExercise ? (
+                <>
+                  <p className="text-center text-gray-600 text-sm sm:text-base mb-4 sm:mb-6">
+                    <Zap size={16} className="inline mr-1" />
+                    {exercise.recommendedSets} rodadas | Prep: {exercise.prepTime || 10}s | Trab:{" "}
+                    {exercise.workTime || 30}s | Desc: {exercise.restTime || 15}s
+                  </p>
 
-              <div className="mb-4">
-                <p className="text-center text-sm text-gray-500 mb-2">
-                  Rodada {currentHiitSeriesIndex + 1} de {exercise.hiitSeries?.length || 0}
-                </p>
-                <HiitTimer
-                  key={`${exercise.id}-${currentHiitSeriesIndex}`}
-                  prepTime={exercise.prepTime || 10}
-                  workTime={exercise.workTime || 30}
-                  restTime={exercise.restTime || 15}
-                  grandTotalTime={
-                    ((exercise.prepTime || 10) +
-                      (exercise.workTime || 30) +
-                      (exercise.restTime || 15)) *
-                    (exercise.hiitSeries?.length || 1)
-                  }
-                  cumulativeElapsedBeforeRound={hiitCumulativeElapsed}
-                  autoStart={currentHiitSeriesIndex > 0}
-                  onRoundComplete={handleHiitRoundComplete}
-                  onReset={handleHiitReset}
-                />
-              </div>
-            </>
-          ) : (
-            <>
-              <p className="text-center text-gray-600 text-sm sm:text-base mb-4 sm:mb-6">
-                Recomendado: {exercise.series.length} x {exercise.recommendedRepsMin}-
-                {exercise.recommendedRepsMax} [{exercise.recommendedWeight}K Carga]
-              </p>
+                  <div className="mb-4 landscape:order-first">
+                    <p className="text-center text-sm text-gray-500 mb-2">
+                      Rodada {currentHiitSeriesIndex + 1} de {exercise.hiitSeries?.length || 0}
+                    </p>
+                    <HiitTimer
+                      key={`${exercise.id}-${currentHiitSeriesIndex}`}
+                      prepTime={exercise.prepTime || 10}
+                      workTime={exercise.workTime || 30}
+                      restTime={exercise.restTime || 15}
+                      grandTotalTime={
+                        ((exercise.prepTime || 10) +
+                          (exercise.workTime || 30) +
+                          (exercise.restTime || 15)) *
+                        (exercise.hiitSeries?.length || 1)
+                      }
+                      cumulativeElapsedBeforeRound={hiitCumulativeElapsed}
+                      autoStart={currentHiitSeriesIndex > 0}
+                      onRoundComplete={handleHiitRoundComplete}
+                      onReset={handleHiitReset}
+                    />
+                  </div>
+                </>
+              ) : (
+                <>
+                  <p className="text-center text-gray-600 text-sm sm:text-base mb-4 sm:mb-6">
+                    Recomendado: {exercise.series.length} x {exercise.recommendedRepsMin}-
+                    {exercise.recommendedRepsMax} [{exercise.recommendedWeight}K Carga]
+                  </p>
 
-              <div className="space-y-3 sm:space-y-4">
-                {exercise.series.map((series, index) => (
-                  <div
-                    key={series.id}
-                    className="flex items-center gap-2 sm:gap-3 p-3 bg-gray-50 rounded-lg"
+                  <div className="space-y-3 sm:space-y-4">
+                    {exercise.series.map((series, index) => (
+                      <div
+                        key={series.id}
+                        className="flex items-center gap-2 sm:gap-3 p-3 bg-gray-50 rounded-lg"
+                      >
+                        <span className="font-medium text-gray-700 w-8 text-sm sm:text-base">
+                          {index + 1}ª
+                        </span>
+
+                        <div className="flex-1 flex items-center gap-2">
+                          <label className="text-xs text-gray-500 hidden sm:inline">Reps:</label>
+                          <NumberInput
+                            value={series.reps}
+                            onChange={(val) => onUpdateSeries(series.id, "reps", val)}
+                            className="w-16 sm:w-20 border border-gray-300 rounded px-2 py-2 text-center text-sm sm:text-base focus:outline-none focus:ring-2 focus:ring-red-500 min-h-11"
+                          />
+                        </div>
+
+                        <div className="flex-1 flex items-center gap-2">
+                          <label className="text-xs text-gray-500 hidden sm:inline">Carga:</label>
+                          <NumberInput
+                            value={series.weight}
+                            onChange={(val) => onUpdateSeries(series.id, "weight", val)}
+                            step={0.5}
+                            className="w-16 sm:w-20 border border-gray-300 rounded px-2 py-2 text-center text-sm sm:text-base focus:outline-none focus:ring-2 focus:ring-red-500 min-h-11"
+                          />
+                        </div>
+
+                        <button
+                          onClick={() => onUpdateSeries(series.id, "completed", !series.completed)}
+                          className={`w-10 h-10 sm:w-11 sm:h-11 rounded flex items-center justify-center shrink-0 transition-colors ${
+                            series.completed ? "bg-green-500" : "bg-gray-200 active:bg-gray-300"
+                          }`}
+                        >
+                          {series.completed && <Check size={18} className="text-white" />}
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                </>
+              )}
+
+              <div className="mt-4 sm:mt-6">
+                {onNext ? (
+                  <button
+                    onClick={onNext}
+                    className="w-full flex items-center justify-center gap-2 bg-red-500 text-white py-3 rounded-lg active:bg-red-600 transition-colors min-h-12 text-sm sm:text-base"
                   >
-                    <span className="font-medium text-gray-700 w-8 text-sm sm:text-base">
-                      {index + 1}ª
-                    </span>
-
-                    <div className="flex-1 flex items-center gap-2">
-                      <label className="text-xs text-gray-500 hidden sm:inline">Reps:</label>
-                      <NumberInput
-                        value={series.reps}
-                        onChange={(val) => onUpdateSeries(series.id, "reps", val)}
-                        className="w-16 sm:w-20 border border-gray-300 rounded px-2 py-2 text-center text-sm sm:text-base focus:outline-none focus:ring-2 focus:ring-red-500 min-h-11"
-                      />
-                    </div>
-
-                    <div className="flex-1 flex items-center gap-2">
-                      <label className="text-xs text-gray-500 hidden sm:inline">Carga:</label>
-                      <NumberInput
-                        value={series.weight}
-                        onChange={(val) => onUpdateSeries(series.id, "weight", val)}
-                        step={0.5}
-                        className="w-16 sm:w-20 border border-gray-300 rounded px-2 py-2 text-center text-sm sm:text-base focus:outline-none focus:ring-2 focus:ring-red-500 min-h-11"
-                      />
-                    </div>
-
-                    <button
-                      onClick={() => onUpdateSeries(series.id, "completed", !series.completed)}
-                      className={`w-10 h-10 sm:w-11 sm:h-11 rounded flex items-center justify-center shrink-0 transition-colors ${
-                        series.completed ? "bg-green-500" : "bg-gray-200 active:bg-gray-300"
-                      }`}
-                    >
-                      {series.completed && <Check size={18} className="text-white" />}
-                    </button>
-                  </div>
-                ))}
+                    <span>Próximo</span>
+                    <ArrowRight size={20} />
+                  </button>
+                ) : (
+                  <button
+                    onClick={onFinish}
+                    className="w-full flex items-center justify-center gap-2 bg-green-500 text-white py-3 rounded-lg active:bg-green-600 transition-colors min-h-12 text-sm sm:text-base"
+                  >
+                    <span>Finalizar</span>
+                    <ArrowUp size={20} />
+                  </button>
+                )}
               </div>
-            </>
-          )}
-
-          <div className="mt-4 sm:mt-6">
-            {onNext ? (
-              <button
-                onClick={onNext}
-                className="w-full flex items-center justify-center gap-2 bg-red-500 text-white py-3 rounded-lg active:bg-red-600 transition-colors min-h-12 text-sm sm:text-base"
-              >
-                <span>Próximo</span>
-                <ArrowRight size={20} />
-              </button>
-            ) : (
-              <button
-                onClick={onFinish}
-                className="w-full flex items-center justify-center gap-2 bg-green-500 text-white py-3 rounded-lg active:bg-green-600 transition-colors min-h-12 text-sm sm:text-base"
-              >
-                <span>Finalizar</span>
-                <ArrowUp size={20} />
-              </button>
-            )}
+            </div>
           </div>
         </div>
       </main>

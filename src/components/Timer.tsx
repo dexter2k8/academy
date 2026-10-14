@@ -55,8 +55,8 @@ export function Timer({ duration, onComplete }: TimerProps) {
   const strokeDashoffset = circumference - (progress / 100) * circumference;
 
   return (
-    <div className="flex flex-col items-center gap-4">
-      <div className="relative w-48 h-48 sm:w-56 sm:h-56">
+    <div className="flex flex-col items-center gap-4 landscape:flex-row landscape:items-center landscape:justify-center landscape:gap-6">
+      <div className="relative w-[min(12rem,44dvh)] h-[min(12rem,44dvh)] sm:w-[min(14rem,50dvh)] sm:h-[min(14rem,50dvh)]">
         <svg className="w-full h-full -rotate-90" viewBox="0 0 200 200">
           <circle cx="100" cy="100" r="90" fill="none" stroke="#e5e7eb" strokeWidth="8" />
           <circle
@@ -73,14 +73,14 @@ export function Timer({ duration, onComplete }: TimerProps) {
           />
         </svg>
         <div className="absolute inset-0 flex flex-col items-center justify-center">
-          <span className="text-4xl sm:text-5xl font-bold text-gray-800">
+          <span className="text-[length:min(2.25rem,9dvh)] sm:text-[length:min(3rem,10dvh)] font-bold text-gray-800">
             {formatTime(timeLeft)}
           </span>
           <span className="text-sm text-gray-500 mt-1">{formatTime(duration)}</span>
         </div>
       </div>
 
-      <div className="flex gap-3">
+      <div className="flex gap-3 landscape:flex-col landscape:gap-2">
         {!isRunning ? (
           <button
             onClick={handleStart}

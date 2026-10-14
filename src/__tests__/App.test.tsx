@@ -114,7 +114,7 @@ describe('App - Navigation', () => {
     render(<App />);
     fireEvent.click(screen.getByText('Treino Tempo'));
     fireEvent.click(screen.getByText('Prancha'));
-    expect(screen.getByText('Exercicio 1 de 2')).toBeInTheDocument();
+    expect(screen.getByText('Exercício 1 de 2')).toBeInTheDocument();
     expect(screen.getByText('3 x 30s')).toBeInTheDocument();
   });
 
@@ -122,7 +122,7 @@ describe('App - Navigation', () => {
     render(<App />);
     fireEvent.click(screen.getByText('Treino Tempo'));
     fireEvent.click(screen.getByText('Prancha'));
-    const backBtn = screen.getByText(/Exercicio/).closest('header')!.querySelector('button')!;
+    const backBtn = screen.getByText(/Exercício/).closest('header')!.querySelector('button')!;
     fireEvent.click(backBtn);
     expect(screen.getByText('Prancha')).toBeInTheDocument();
   });
