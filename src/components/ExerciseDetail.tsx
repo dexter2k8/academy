@@ -177,8 +177,8 @@ export function ExerciseDetail({
   const totalSeries = getExerciseSeries(exercise).length;
 
   return (
-    <div className="flex flex-col min-h-dvh bg-gray-100 safe-area-inset">
-      <header className="bg-red-500 text-white px-4 py-3 flex items-center gap-3 sticky top-0 z-10 shadow-md">
+    <div className="flex flex-col h-dvh overflow-hidden bg-gray-100 safe-area-inset">
+      <header className="bg-red-500 text-white px-4 py-3 landscape:py-1 flex items-center gap-3 sticky top-0 z-10 shadow-md">
         <button
           onClick={onBack}
           className="p-2 -ml-1 min-w-11 min-h-11 flex items-center justify-center"
@@ -190,15 +190,15 @@ export function ExerciseDetail({
         </h1>
       </header>
 
-      <main className="flex-1 p-3 sm:p-4 pb-20 landscape:pb-14 overflow-y-auto">
-        <div className="bg-white rounded-lg shadow p-4 sm:p-6">
+      <main className="flex-1 min-h-0 p-3 sm:p-4 landscape:px-3 landscape:py-2 overflow-y-auto">
+        <div className="bg-white rounded-lg shadow p-4 sm:p-6 landscape:px-3 landscape:py-2">
           <div className="landscape:flex landscape:gap-6 landscape:items-start">
             <div className="landscape:w-44 landscape:shrink-0">
-              <h2 className="text-lg sm:text-xl font-bold text-gray-800 text-center mb-3 sm:mb-4">
+              <h2 className="text-lg sm:text-xl font-bold text-gray-800 text-center mb-3 sm:mb-4 landscape:text-base landscape:mb-2">
                 {exercise.name}
               </h2>
 
-              <div className="w-[min(8rem,30dvh)] h-[min(8rem,30dvh)] sm:w-[min(12rem,32dvh)] sm:h-[min(12rem,32dvh)] mx-auto bg-gray-100 rounded-full flex items-center justify-center mb-4 overflow-hidden">
+              <div className="w-[min(8rem,30dvh)] h-[min(8rem,30dvh)] sm:w-[min(12rem,32dvh)] sm:h-[min(12rem,32dvh)] landscape:w-[min(6rem,26dvh)] landscape:h-[min(6rem,26dvh)] mx-auto bg-gray-100 rounded-full flex items-center justify-center mb-4 overflow-hidden">
                 {imageUrl ? (
                   <img
                     src={imageUrl}
@@ -217,13 +217,13 @@ export function ExerciseDetail({
             <div className="landscape:flex-1 landscape:min-w-0 landscape:flex landscape:flex-col">
               {isTimedExercise ? (
                 <>
-                  <p className="text-center text-gray-600 text-sm sm:text-base mb-4 sm:mb-6">
+                  <p className="text-center text-gray-600 text-sm sm:text-base mb-4 sm:mb-6 landscape:text-xs landscape:mb-2">
                     <TimerIcon size={16} className="inline mr-1" />
                     {exercise.recommendedSets} x {exercise.duration || 30}s
                   </p>
 
-                  <div className="mb-4 landscape:order-first">
-                    <p className="text-center text-sm text-gray-500 mb-2">
+                  <div className="mb-4 landscape:order-first landscape:mb-2">
+                    <p className="text-center text-sm text-gray-500 mb-2 landscape:text-xs landscape:mb-1">
                       Série {currentTimedSeriesIndex + 1} de {exercise.timedSeries?.length || 0}
                     </p>
                     <Timer
@@ -233,11 +233,11 @@ export function ExerciseDetail({
                     />
                   </div>
 
-                  <div className="space-y-2">
+                  <div className="space-y-2 landscape:grid landscape:grid-cols-2 landscape:gap-2 landscape:space-y-0">
                     {exercise.timedSeries?.map((series, index) => (
                       <div
                         key={series.id}
-                        className={`flex items-center justify-between p-3 rounded-lg ${
+                        className={`flex items-center justify-between p-3 landscape:p-2 rounded-lg ${
                           series.completed
                             ? "bg-green-50"
                             : index === currentTimedSeriesIndex
@@ -265,14 +265,14 @@ export function ExerciseDetail({
                 </>
               ) : isHiitExercise ? (
                 <>
-                  <p className="text-center text-gray-600 text-sm sm:text-base mb-4 sm:mb-6">
+                  <p className="text-center text-gray-600 text-sm sm:text-base mb-4 sm:mb-6 landscape:text-xs landscape:mb-2">
                     <Zap size={16} className="inline mr-1" />
                     {exercise.recommendedSets} rodadas | Prep: {exercise.prepTime || 10}s | Trab:{" "}
                     {exercise.workTime || 30}s | Desc: {exercise.restTime || 15}s
                   </p>
 
-                  <div className="mb-4 landscape:order-first">
-                    <p className="text-center text-sm text-gray-500 mb-2">
+                  <div className="mb-4 landscape:order-first landscape:mb-2">
+                    <p className="text-center text-sm text-gray-500 mb-2 landscape:text-xs landscape:mb-1">
                       Rodada {currentHiitSeriesIndex + 1} de {exercise.hiitSeries?.length || 0}
                     </p>
                     <HiitTimer
@@ -295,16 +295,16 @@ export function ExerciseDetail({
                 </>
               ) : (
                 <>
-                  <p className="text-center text-gray-600 text-sm sm:text-base mb-4 sm:mb-6">
+                  <p className="text-center text-gray-600 text-sm sm:text-base mb-4 sm:mb-6 landscape:text-xs landscape:mb-2">
                     Recomendado: {exercise.series.length} x {exercise.recommendedRepsMin}-
                     {exercise.recommendedRepsMax} [{exercise.recommendedWeight}K Carga]
                   </p>
 
-                  <div className="space-y-3 sm:space-y-4">
+                  <div className="space-y-3 sm:space-y-4 landscape:grid landscape:grid-cols-2 landscape:gap-2 landscape:space-y-0">
                     {exercise.series.map((series, index) => (
                       <div
                         key={series.id}
-                        className="flex items-center gap-2 sm:gap-3 p-3 bg-gray-50 rounded-lg"
+                        className="flex items-center gap-2 sm:gap-3 p-3 landscape:p-2 bg-gray-50 rounded-lg"
                       >
                         <span className="font-medium text-gray-700 w-8 text-sm sm:text-base">
                           {index + 1}ª
@@ -343,11 +343,11 @@ export function ExerciseDetail({
                 </>
               )}
 
-              <div className="mt-4 sm:mt-6">
+              <div className="mt-4 sm:mt-6 landscape:mt-3">
                 {onNext ? (
                   <button
                     onClick={onNext}
-                    className="w-full flex items-center justify-center gap-2 bg-red-500 text-white py-3 rounded-lg active:bg-red-600 transition-colors min-h-12 text-sm sm:text-base"
+                    className="w-full flex items-center justify-center gap-2 bg-red-500 text-white py-3 rounded-lg active:bg-red-600 transition-colors min-h-12 landscape:min-h-11 text-sm sm:text-base"
                   >
                     <span>Próximo</span>
                     <ArrowRight size={20} />
@@ -355,7 +355,7 @@ export function ExerciseDetail({
                 ) : (
                   <button
                     onClick={onFinish}
-                    className="w-full flex items-center justify-center gap-2 bg-green-500 text-white py-3 rounded-lg active:bg-green-600 transition-colors min-h-12 text-sm sm:text-base"
+                    className="w-full flex items-center justify-center gap-2 bg-green-500 text-white py-3 rounded-lg active:bg-green-600 transition-colors min-h-12 landscape:min-h-11 text-sm sm:text-base"
                   >
                     <span>Finalizar</span>
                     <ArrowUp size={20} />
@@ -367,7 +367,7 @@ export function ExerciseDetail({
         </div>
       </main>
 
-      <footer className="bg-white border-t border-gray-200 px-4 py-3 flex justify-between items-center sticky bottom-0 z-10 safe-area-bottom">
+      <footer className="bg-white border-t border-gray-200 px-4 py-3 landscape:py-2 flex justify-between items-center sticky bottom-0 z-10 safe-area-bottom">
         <div className="flex items-center gap-2 text-gray-600">
           <Dumbbell size={18} />
           <span className="text-xs sm:text-sm">

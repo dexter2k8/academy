@@ -128,8 +128,8 @@ export function HiitTimer({
   const phaseColor = getPhaseColor(phase);
 
   return (
-    <div className="flex flex-col items-center gap-4 landscape:flex-row landscape:items-center landscape:justify-center landscape:gap-6">
-      <div className="relative w-[min(12rem,44dvh)] h-[min(12rem,44dvh)] sm:w-[min(14rem,50dvh)] sm:h-[min(14rem,50dvh)]">
+    <div className="flex flex-col items-center gap-4 landscape:flex-row landscape:items-center landscape:justify-center landscape:gap-4">
+      <div className="relative w-[min(12rem,44dvh)] h-[min(12rem,44dvh)] sm:w-[min(14rem,50dvh)] sm:h-[min(14rem,50dvh)] landscape:w-[min(11rem,34dvh)] landscape:h-[min(11rem,34dvh)]">
         <svg className="w-full h-full -rotate-90" viewBox="0 0 200 200">
           <circle cx="100" cy="100" r="90" fill="none" stroke="#e5e7eb" strokeWidth="8" />
           <circle
@@ -152,15 +152,15 @@ export function HiitTimer({
           >
             {getPhaseLabel(phase)}
           </span>
-          <span className="text-[length:min(2.25rem,9dvh)] sm:text-[length:min(3rem,10dvh)] font-bold text-gray-800">
+          <span className="text-[length:min(2.25rem,9dvh)] sm:text-[length:min(3rem,10dvh)] landscape:text-[length:min(2rem,7.5dvh)] font-bold text-gray-800">
             {formatTime(timeLeft)}
           </span>
           <span className="text-sm text-gray-500 mt-1">{formatTime(currentDuration)}</span>
         </div>
       </div>
 
-      <div className="flex flex-col items-center gap-4 landscape:items-start landscape:gap-3">
-        <p className="text-sm text-gray-500">
+      <div className="flex flex-col items-center gap-4 landscape:items-start landscape:gap-2">
+        <p className="text-sm text-gray-500 landscape:text-xs">
           Tempo total: {formatTime(totalRemaining > 0 ? totalRemaining : 0)}
         </p>
 
@@ -169,7 +169,7 @@ export function HiitTimer({
             <button
               onClick={handleStart}
               disabled={timeLeft === 0}
-              className="flex items-center justify-center gap-2 bg-red-500 text-white px-6 py-3 rounded-lg active:bg-red-600 transition-colors min-h-12 text-sm sm:text-base disabled:opacity-50 disabled:cursor-not-allowed"
+              className="flex items-center justify-center gap-2 bg-red-500 text-white px-6 py-3 rounded-lg active:bg-red-600 transition-colors min-h-12 landscape:min-h-11 text-sm sm:text-base disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <Play size={20} />
               <span>Iniciar</span>
@@ -177,7 +177,7 @@ export function HiitTimer({
           ) : (
             <button
               onClick={handlePause}
-              className="flex items-center justify-center gap-2 bg-yellow-500 text-white px-6 py-3 rounded-lg active:bg-yellow-600 transition-colors min-h-12 text-sm sm:text-base"
+              className="flex items-center justify-center gap-2 bg-yellow-500 text-white px-6 py-3 rounded-lg active:bg-yellow-600 transition-colors min-h-12 landscape:min-h-11 text-sm sm:text-base"
             >
               <Pause size={20} />
               <span>Pausar</span>
@@ -185,7 +185,7 @@ export function HiitTimer({
           )}
           <button
             onClick={handleReset}
-            className="flex items-center justify-center gap-2 bg-gray-200 text-gray-700 px-6 py-3 rounded-lg active:bg-gray-300 transition-colors min-h-12 text-sm sm:text-base"
+            className="flex items-center justify-center gap-2 bg-gray-200 text-gray-700 px-6 py-3 rounded-lg active:bg-gray-300 transition-colors min-h-12 landscape:min-h-11 text-sm sm:text-base"
           >
             <RotateCcw size={20} />
             <span>Resetar</span>
