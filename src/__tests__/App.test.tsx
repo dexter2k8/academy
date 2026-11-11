@@ -176,3 +176,129 @@ describe('App - Edit workout', () => {
     expect(screen.getByText('Editar Treino')).toBeInTheDocument();
   });
 });
+
+describe('App - Botão voltar do Android (popstate)', () => {
+  it('volta da tela de exercício para o detalhe do treino', () => {
+    render(<App />);
+    fireEvent.click(screen.getByText('Treino Tempo'));
+    fireEvent.click(screen.getByText('Prancha'));
+    expect(screen.getByText('Exercício 1 de 2')).toBeInTheDocument();
+
+    fireEvent.popState(window);
+
+    expect(screen.queryByText('Exercício 1 de 2')).not.toBeInTheDocument();
+    expect(screen.getByText('Prancha')).toBeInTheDocument();
+    expect(screen.getByText('Agachamento')).toBeInTheDocument();
+  });
+
+  it('volta do treino para o menu inicial', () => {
+    render(<App />);
+    fireEvent.click(screen.getByText('Treino Tempo'));
+    expect(screen.queryByText('Escolha uma rotina')).not.toBeInTheDocument();
+
+    fireEvent.popState(window);
+
+    expect(screen.getByText('Escolha uma rotina')).toBeInTheDocument();
+  });
+
+  it('volta do formulário para o menu inicial', () => {
+    render(<App />);
+    fireEvent.click(screen.getByText('Adicionar Treino'));
+    expect(screen.getByText('Novo Treino')).toBeInTheDocument();
+
+    fireEvent.popState(window);
+
+    expect(screen.getByText('Escolha uma rotina')).toBeInTheDocument();
+  });
+
+  it('no menu inicial, o voltar abre o popup de confirmação', () => {
+    render(<App />);
+
+    fireEvent.popState(window);
+
+    expect(screen.getByRole('dialog')).toBeInTheDocument();
+    expect(screen.getByText('Sair da aplicação?')).toBeInTheDocument();
+    expect(screen.getByText('Sair')).toBeInTheDocument();
+    expect(screen.getByText('Cancelar')).toBeInTheDocument();
+  });
+
+  it('cancelar no popup mantém o aplicativo aberto', () => {
+    render(<App />);
+    fireEvent.popState(window);
+
+    fireEvent.click(screen.getByText('Cancelar'));
+
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+    expect(screen.getByText('Escolha uma rotina')).toBeInTheDocument();
+  });
+
+  it('confirmar a saída fecha o popup e tenta encerrar a aplicação', () => {
+    const closeSpy = vi.spyOn(window, 'close').mockImplementation(() => {});
+    const { unmount } = render(<App />);
+    fireEvent.popState(window);
+
+    fireEvent.click(screen.getByText('Sair'));
+
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+    expect(closeSpy).toHaveBeenCalled();
+
+    // remove o listener antes do "traversal" assíncrono do jsdom disparar
+    unmount();
+    closeSpy.mockRestore();
+  });
+
+  it('com todos os exercícios marcados, voltar desmarca todos', () => {
+    render(<App />);
+    fireEvent.click(screen.getByText('Treino Tempo'));
+
+    // marca todos os exercícios do treino
+    ['Prancha', 'Agachamento'].forEach((name) => {
+      const row = screen.getByText(name).closest('div')!;
+      fireEvent.click(row.querySelector('button')!);
+    });
+    expect(screen.getByText(/Feito 2 de 2/)).toBeInTheDocument();
+
+    // volta para o menu pelo botão da tela
+    const backBtn = screen.getByText('Treino Tempo').closest('header')!.querySelector('button')!;
+    fireEvent.click(backBtn);
+    expect(screen.getByText('Escolha uma rotina')).toBeInTheDocument();
+
+    // reentra: tudo desmarcado
+    fireEvent.click(screen.getByText('Treino Tempo'));
+    expect(screen.getByText(/Feito 0 de 2/)).toBeInTheDocument();
+    expect(screen.getByText('0% Completo')).toBeInTheDocument();
+  });
+
+  it('com apenas parte marcada, voltar mantém as marcações', () => {
+    render(<App />);
+    fireEvent.click(screen.getByText('Treino Tempo'));
+
+    const row = screen.getByText('Prancha').closest('div')!;
+    fireEvent.click(row.querySelector('button')!);
+    expect(screen.getByText(/Feito 1 de 2/)).toBeInTheDocument();
+
+    const backBtn = screen.getByText('Treino Tempo').closest('header')!.querySelector('button')!;
+    fireEvent.click(backBtn);
+
+    fireEvent.click(screen.getByText('Treino Tempo'));
+    expect(screen.getByText(/Feito 1 de 2/)).toBeInTheDocument();
+    expect(screen.getByText('50% Completo')).toBeInTheDocument();
+  });
+
+  it('o voltar físico também desmarca tudo ao sair do treino', () => {
+    render(<App />);
+    fireEvent.click(screen.getByText('Treino Tempo'));
+
+    ['Prancha', 'Agachamento'].forEach((name) => {
+      const row = screen.getByText(name).closest('div')!;
+      fireEvent.click(row.querySelector('button')!);
+    });
+    expect(screen.getByText(/Feito 2 de 2/)).toBeInTheDocument();
+
+    fireEvent.popState(window);
+    expect(screen.getByText('Escolha uma rotina')).toBeInTheDocument();
+
+    fireEvent.click(screen.getByText('Treino Tempo'));
+    expect(screen.getByText(/Feito 0 de 2/)).toBeInTheDocument();
+  });
+});
